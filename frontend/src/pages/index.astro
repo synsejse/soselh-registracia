@@ -1,72 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import HeroCarousel from "../components/HeroCarousel.astro";
+import IntroSection from "../components/IntroSection.astro";
 ---
 
 <Layout title="Úvod">
-    <section class="hero">
-        <h1>Vitajte na našej stránke</h1>
-        <p>
-            Toto je jednoduchá úvodná stránka na otestovanie, či všetko funguje.
-            Nájdete tu odkazy na základné podstránky.
-        </p>
-    </section>
-
-    <section class="links">
-        <h2>Rýchle odkazy</h2>
-        <ul>
-            <li><a href="/about">O nás</a> — Kto sme a čo robíme</li>
-            <li><a href="/offer">Ponuka</a> — Naše služby a produkty</li>
-            <li>
-                <a href="/references">Referencie</a> — Projekty a spokojní klienti
-            </li>
-            <li><a href="/news">Aktuálne</a> — Novinky a oznámenia</li>
-            <li>
-                <a href="/documents">Dokumenty</a> — Na stiahnutie a podklady
-            </li>
-            <li><a href="/contact">Kontakt</a> — Ako sa s nami spojiť</li>
-        </ul>
-    </section>
+    <HeroCarousel />
+    <IntroSection />
 </Layout>
-
-<style>
-    .hero {
-        padding: 1rem 0 0.5rem;
-    }
-
-    .hero h1 {
-        margin: 0 0 0.25rem;
-        font-size: 2rem;
-        line-height: 1.2;
-    }
-
-    .hero p {
-        margin: 0;
-        color: #4b5563;
-    }
-
-    .links {
-        margin-top: 1.25rem;
-    }
-
-    .links h2 {
-        margin: 0 0 0.5rem;
-        font-size: 1.25rem;
-    }
-
-    .links ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 0.5rem;
-    }
-
-    .links li a {
-        text-decoration: none;
-        color: #0f62fe;
-    }
-
-    .links li a:hover {
-        text-decoration: underline;
-    }
-</style>

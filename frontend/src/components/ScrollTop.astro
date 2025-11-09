@@ -1,0 +1,127 @@
+---
+export interface Props {
+    /**
+     * Y-scroll threshold (in px) before the button appears.
+     */
+    threshold?: number;
+    /**
+     * Accessible label for screen readers.
+     */
+    label?: string;
+    /**
+     * Distance from the bottom edge (any valid CSS length).
+     */
+    bottom?: string;
+    /**
+     * Distance from the right edge (any valid CSS length).
+     */
+    right?: string;
+    /**
+     * Button size in pixels (width/height are equal).
+     */
+    size?: number;
+}
+
+const {
+    threshold = 300,
+    label = "Posunúť hore",
+    bottom = "1.25rem",
+    right = "1.25rem",
+    size = 48,
+} = Astro.props;
+---
+
+<button
+    id="scrollTop"
+    data-threshold={threshold}
+    class="scroll-top"
+    aria-label={label}
+    title={label}
+    style={`--st-size:${size}px; --st-bottom:${bottom}; --st-right:${right};`}
+>
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 5l-7 7h4v7h6v-7h4l-7-7z" fill="currentColor"></path>
+    </svg>
+</button>
+
+<style>
+    .scroll-top {
+        position: fixed;
+        bottom: var(--st-bottom);
+        right: var(--st-right);
+        background: #0f62fe;
+        color: #ffffff;
+        border: none;
+        border-radius: 999px;
+        width: var(--st-size);
+        height: var(--st-size);
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        display: none; /* toggled via .show */
+        transition:
+            opacity 0.3s ease,
+            transform 0.3s ease,
+            background-color 0.2s ease;
+        z-index: 1000;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .scroll-top.show {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .scroll-top:hover {
+        background: #0b53d6;
+    }
+
+    .scroll-top:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 3px rgba(15, 98, 254, 0.2),
+            0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .scroll-top .icon {
+        width: calc(var(--st-size) * 0.6);
+        height: calc(var(--st-size) * 0.6);
+        display: block;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .scroll-top {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    if (typeof window !== "undefined") {
+        const btn = document.getElementById("scrollTop");
+        const scrollThreshold = parseInt(btn?.dataset.threshold || "300", 10);
+
+        function onScroll() {
+            if (!btn) return;
+            if (window.scrollY > scrollThreshold) {
+                btn.classList.add("show");
+            } else {
+                btn.classList.remove("show");
+            }
+        }
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        // Initialize state on load
+        onScroll();
+
+        btn?.addEventListener("click", () => {
+            try {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } catch {
+                // Fallback for older browsers
+                window.scrollTo(0, 0);
+            }
+        });
+    }
+</script>

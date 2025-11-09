@@ -1,4 +1,9 @@
 ---
+import Header from "../components/Header.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import ScrollTop from "../components/ScrollTop.astro";
+
 export interface Props {
     title?: string;
 }
@@ -11,31 +16,21 @@ const { title = "Web" } = Astro.props;
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
         <title>{title}</title>
     </head>
     <body>
-        <header>
-            <nav aria-label="Hlavná navigácia">
-                <a href="/" class="brand">Úvod</a>
-                <ul>
-                    <li><a href="/about">O nás</a></li>
-                    <li><a href="/offer">Ponuka</a></li>
-                    <li><a href="/references">Referencie</a></li>
-                    <li><a href="/news">Aktuálne</a></li>
-                    <li><a href="/documents">Dokumenty</a></li>
-                    <li><a href="/contact">Kontakt</a></li>
-                </ul>
-            </nav>
-        </header>
+        <div class="header-nav-wrapper">
+            <Header />
+            <Navbar />
+        </div>
 
         <main>
             <slot />
         </main>
 
-        <footer>
-            <small>&copy; {new Date().getFullYear()}</small>
-        </footer>
+        <Footer />
+        <ScrollTop />
     </body>
 </html>
 
@@ -74,58 +69,26 @@ const { title = "Web" } = Astro.props;
         line-height: 1.5;
     }
 
-    header {
+    .header-nav-wrapper {
         position: sticky;
         top: 0;
-        z-index: 10;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-    }
-
-    nav {
-        max-width: var(--container);
-        margin: 0 auto;
-        padding: 0.75rem 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .brand {
-        font-weight: 700;
-        color: var(--text);
-        text-decoration: none;
-    }
-
-    nav ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    nav a {
-        color: var(--text);
-        text-decoration: none;
-    }
-
-    nav a:hover {
-        color: var(--primary);
+        z-index: 1000;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     main {
+        width: 100%;
+    }
+
+    /* Generic constrained container (use inside pages for non full-bleed sections) */
+    .container {
         max-width: var(--container);
         margin: 1.5rem auto;
         padding: 0 1rem;
     }
 
-    footer {
-        max-width: var(--container);
-        margin: 2rem auto 0;
-        padding: 1rem;
-        color: var(--muted);
-        border-top: 1px solid var(--border);
-    }
+    /* Footer styles removed; Footer component provides its own styles */
+
+    /* scroll-top styles moved to ScrollTop component */
 </style>

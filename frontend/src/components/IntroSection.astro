@@ -1,0 +1,157 @@
+---
+export interface Props {
+    imageSrc?: string;
+    imageAlt?: string;
+    title?: string;
+}
+
+const {
+    imageSrc = "/intro-banner.jpg",
+    imageAlt = "ŠD STAVBY – Kvalita, spoľahlivosť, tradícia",
+    title = "KVALITA / SPOĽAHLIVOSŤ / TRADÍCIA",
+} = Astro.props;
+---
+
+<section class="intro-section" aria-labelledby="intro-title">
+    <div class="intro-container">
+        <div class="intro-grid">
+            <div class="intro-left">
+                <h2 id="intro-title" class="intro-title">{title}</h2>
+                <p class="intro-lead">
+                    Spoločnosť ŠD STAVBY s.r.o. sa zameriava na komplexnú
+                    revitalizáciu bytových domov a rodinných domov. Samozrejme
+                    poskytujeme všetky ostatné služby stavebnej spoločnosti ako
+                    výstavbu, zateplenie, rekonštrukcie ap.
+                </p>
+
+                <div class="cards">
+                    <article class="card">
+                        <h3 class="card-title">
+                            Komplexná revitalizácia budov
+                        </h3>
+                        <p class="card-text">
+                            Najlepší spôsob ako predĺžiť životnosť pôvodnej
+                            stavby a radikálne znížiť výdavky na prevádzku
+                            stavby hlavne po energetickej stránke.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 class="card-title">Realizácia stavieb</h3>
+                        <p class="card-text">
+                            Na stavebnom trhu pôsobíme už viac ako 15 rokov.
+                            Neustále inovujeme a využívame najmodernejšie
+                            postupy, technológie a materiály.
+                        </p>
+                    </article>
+                </div>
+            </div>
+
+            <figure class="intro-right">
+                <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    class="intro-image"
+                    loading="lazy"
+                />
+            </figure>
+        </div>
+    </div>
+</section>
+
+<style>
+    .intro-section {
+        background: #ffffff;
+    }
+
+    .intro-container {
+        max-width: var(--container, 1100px);
+        margin: 0 auto;
+        padding: 1.75rem 1rem 2rem;
+    }
+
+    .intro-grid {
+        display: grid;
+        /* Single column by default (implicit), no need for grid-template-columns: 1fr */
+        gap: 1.25rem;
+        align-items: center;
+    }
+
+    .intro-left {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .intro-title {
+        margin: 0;
+        font-size: clamp(1.4rem, 3.2vw, 2rem);
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+    }
+
+    .intro-lead {
+        margin: 0.25rem 0 0.5rem;
+        color: #374151;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .cards {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 0.9rem 1rem;
+        box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+    }
+
+    .card-title {
+        margin: 0 0 0.35rem;
+        font-size: 1.05rem;
+        line-height: 1.3;
+    }
+
+    .card-text {
+        margin: 0;
+        color: #374151;
+    }
+
+    .intro-right {
+        margin: 0;
+    }
+
+    .intro-image {
+        width: 100%;
+        height: auto;
+        /* display: block; not needed for img */
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+        object-fit: cover;
+    }
+
+    @media (min-width: 900px) {
+        .intro-grid {
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2rem;
+        }
+
+        .cards {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem;
+        }
+
+        .intro-image {
+            max-height: 420px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .intro-container {
+            padding: 1.25rem 1rem 1.5rem;
+        }
+    }
+</style>
