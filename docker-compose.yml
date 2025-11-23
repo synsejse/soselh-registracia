@@ -1,0 +1,65 @@
+services:
+  db:
+    image: mariadb:12
+    container_name: website_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: messages
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - website_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: website_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      UPLOAD_LIMIT: 300M
+    ports:
+      - "8081:80"
+    networks:
+      - website_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: website_app
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql://appuser:apppassword@db:3306/messages
+      ROCKET_ADDRESS: 0.0.0.0
+      ROCKET_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - website_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  website_network:
+    driver: bridge

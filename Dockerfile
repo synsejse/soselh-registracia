@@ -12,23 +12,26 @@ RUN npm run build
 # Stage 2: Build the Rust backend (with cargo-chef caching)
 ##############################################
 
-# Planner: compute dependency graph to enable caching
-FROM rust:1.91-slim-trixie AS backend-planner
+# Common setup for backend stages
+FROM rust:1.91-slim-trixie AS backend-common
 WORKDIR /app/backend
 RUN cargo install cargo-chef
+RUN apt-get update && \
+    apt-get install -y libssl-dev pkg-config ca-certificates default-libmysqlclient-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Planner: compute dependency graph to enable caching
+FROM backend-common AS backend-planner
 COPY backend/ ./
 RUN cargo chef prepare --recipe-path recipe.json
 
 # Cacher: build dependency layers
-FROM rust:1.91-slim-trixie AS backend-cacher
-WORKDIR /app/backend
-RUN cargo install cargo-chef
+FROM backend-common AS backend-cacher
 COPY --from=backend-planner /app/backend/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # Builder: build the actual backend application
-FROM rust:1.91-slim-trixie AS backend-builder
-WORKDIR /app/backend
+FROM backend-common AS backend-builder
 COPY backend/ ./
 COPY --from=backend-cacher /app/backend/target target
 RUN cargo build --release
@@ -37,6 +40,9 @@ RUN cargo build --release
 # Stage 3: Runtime image
 ##############################################
 FROM debian:trixie-slim AS runtime
+RUN apt-get update && \
+    apt-get install -y default-libmysqlclient-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 RUN useradd -m -u 10001 appuser
 WORKDIR /app
 COPY --from=backend-builder /app/backend/target/release/backend /app/backend
