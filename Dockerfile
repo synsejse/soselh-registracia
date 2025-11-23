@@ -43,7 +43,6 @@ FROM debian:trixie-slim AS runtime
 RUN apt-get update && \
     apt-get install -y default-libmysqlclient-dev ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-RUN useradd -m -u 10001 appuser
 WORKDIR /app
 COPY --from=backend-builder /app/backend/target/release/backend /app/backend
 COPY --from=frontend-builder /app/frontend/dist /app/static
@@ -52,6 +51,5 @@ ENV ROCKET_ADDRESS=0.0.0.0
 ENV ROCKET_PORT=8080
 
 EXPOSE 8080
-USER appuser
 
 CMD ["/app/backend"]
