@@ -146,8 +146,9 @@
         overflow: hidden;
         background: #fff;
         box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
-        display: grid;
-        grid-template-rows: auto 1fr;
+        /* Use flex column so content can grow naturally without being clipped */
+        display: flex;
+        flex-direction: column;
     }
 
     .offer-media {
@@ -165,8 +166,14 @@
 
     .offer-content {
         padding: 1rem 1rem 1.1rem;
-        display: grid;
+        /* Use column flex so the button can be pinned to the bottom for all cards */
+        display: flex;
+        flex-direction: column;
         gap: 0.6rem;
+        /* Important: allow the content block to size naturally inside the card */
+        min-height: 0;
+        /* Fill remaining vertical space of the card so the button reaches the card bottom */
+        flex: 1;
     }
 
     .offer-heading {
@@ -182,16 +189,20 @@
     }
 
     .offer-button {
-        justify-self: start;
-        display: inline-block;
-        margin-top: 0.25rem;
+        align-self: flex-start; /* keep left-aligned */
+        display: inline-flex; /* normalize inline button sizing across cards */
+        align-items: center;
+        margin-top: auto; /* push the button to the bottom of the card content */
         padding: 0.5rem 0.75rem;
         background: var(--primary, #0f62fe);
         color: #fff;
         text-decoration: none;
         border-radius: 8px;
         font-size: 0.95rem;
+        line-height: 1; /* avoid inheriting different line-heights */
+        font-weight: 500; /* ensure consistent visual weight */
         transition: background 0.15s ease-in-out;
+        white-space: nowrap; /* prevent wrapping which can change height */
     }
 
     .offer-button:hover,
