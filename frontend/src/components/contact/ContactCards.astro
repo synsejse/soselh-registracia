@@ -6,7 +6,7 @@ import LocationIcon from "../icons/location-dot.svg";
 
 <section class="contact-cards" aria-labelledby="contact-cards-title">
   <div class="contact-container">
-    <h2 id="contact-cards-title" class="sr-only">Kontaktné informácie</h2>
+    <h2 id="contact-cards-title">Kontaktné informácie</h2>
     <div class="cards-grid">
       <!-- Address -->
       <article class="card">
@@ -72,6 +72,26 @@ import LocationIcon from "../icons/location-dot.svg";
     max-width: var(--container, 1100px);
     margin: 0 auto;
     padding: 2.4rem 1rem 2.8rem; /* match OfferSection spacing */
+  }
+
+  /* Title styling matches ContactForm underline look */
+  #contact-cards-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.15em;
+  }
+  #contact-cards-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0.02em;
+    height: 0.22em;
+    width: 58%;
+    background: linear-gradient(90deg, #0f62fe 0%, #67a8ff 100%);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(15, 98, 254, 0.35);
   }
 
   .cards-grid {
