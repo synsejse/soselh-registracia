@@ -30,19 +30,22 @@
     }
 
     .contact-map {
-        padding: 0;
+        /* Move vertical spacing to the section that owns the smoke background
+           so the spacing area is also smoke-colored */
+        padding: 2rem 0; /* vertical spacing now on background element */
+        background: #f5f5f5; /* match cards background (smoke) */
     }
     /* Constrain map width to match cards container */
     .map-container {
         max-width: var(--container, 1100px);
-        margin: 2rem auto; /* add vertical space above and below the map */
+        margin: 0 auto; /* keep horizontal centering; no vertical margin */
         padding: 0 1rem; /* horizontal padding to align with cards container */
     }
     .map-wrapper {
         width: 100%;
         aspect-ratio: 16 / 9;
         max-height: 70vh;
-        background: #e5e7eb;
+        background: #f5f5f5; /* keep same smoke color while iframe loads */
     }
     .map-wrapper iframe {
         border: 0;
