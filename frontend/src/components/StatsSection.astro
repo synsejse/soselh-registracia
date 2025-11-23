@@ -1,0 +1,203 @@
+---
+// Stats section with background image, dark overlay, animated counters
+---
+
+<section class="stats-section" aria-labelledby="stats-title">
+  <div class="overlay"></div>
+  <div class="stats-container">
+    <h2 id="stats-title" class="stats-title">VIAC o našej práci</h2>
+
+    <div class="stats-grid">
+      <article class="stat-item">
+        <div class="icon" aria-hidden="true">
+          <!-- Star icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.77 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+        </div>
+        <div class="value" data-target="100">0</div>
+        <div class="label">Kvalita služieb</div>
+      </article>
+
+      <article class="stat-item">
+        <div class="icon" aria-hidden="true">
+          <!-- Users icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.79 2.99-4S17.66 3 16 3s-3 1.79-3 4 1.34 4 3 4zm-8 0c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4zm0 2c-2.67 0-8 1.34-8 4v2h10v-2c0-2.66-3.33-4-6-4zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.95v2H24v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>
+        <div class="value" data-target="7500">0</div>
+        <div class="label">Spokojných klientov</div>
+      </article>
+
+      <article class="stat-item">
+        <div class="icon" aria-hidden="true">
+          <!-- Check-square icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-9 14l-4-4 1.41-1.41L10 13.17l6.59-6.58L18 8l-8 9z"/></svg>
+        </div>
+        <div class="value" data-target="300">0</div>
+        <div class="label">Ukončené projekty</div>
+      </article>
+
+      <article class="stat-item">
+        <div class="icon" aria-hidden="true">
+          <!-- Calendar icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10h5v5H7v-5zm10-7h-1V1h-2v2H10V1H8v2H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H7V8h10v11z"/></svg>
+        </div>
+        <div class="value" data-target="15">0</div>
+        <div class="label">Rokov na trhu</div>
+      </article>
+    </div>
+
+    
+  </div>
+
+  <script>
+    // Count-up to target values when section becomes visible, fixed 3s duration.
+    (function () {
+      const run = () => {
+        const section = document.querySelector('.stats-section');
+        if (!section) return;
+
+        const values = Array.from(section.querySelectorAll('.value'));
+        let started = false;
+
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        const animate = (el, target) => {
+          const duration = 3000; // exactly 3 seconds
+          const start = performance.now();
+          // Ensure we always start from 0 in UI
+          el.textContent = (0).toLocaleString('sk-SK');
+
+          const step = (now) => {
+            const p = Math.min(1, (now - start) / duration);
+            const eased = easeOutCubic(p);
+            const val = Math.round(eased * target);
+            el.textContent = val.toLocaleString('sk-SK');
+            if (p < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        };
+
+        const startAll = () => {
+          if (started) return;
+          started = true;
+          values.forEach((el) => {
+            const target = parseInt(el.getAttribute('data-target') || '0', 10);
+            animate(el, target);
+          });
+        };
+
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                startAll();
+                io.disconnect();
+              }
+            });
+          }, { threshold: 0.25 });
+          io.observe(section);
+        } else {
+          // Fallback: start immediately with animation (no IO support)
+          startAll();
+        }
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run, { once: true });
+      } else {
+        run();
+      }
+    })();
+  </script>
+</section>
+
+<style>
+  .stats-section {
+    position: relative;
+    background-image: url('/images/banners/stats-banner.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .stats-container {
+    position: relative;
+    max-width: var(--container, 1100px);
+    margin: 0 auto;
+    padding: 2.4rem 1rem 2.6rem;
+  }
+
+  .stats-title {
+    margin: 0 0 1rem;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    letter-spacing: 0.02em;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.15em;
+  }
+  .stats-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0.02em;
+    height: 0.22em;
+    width: 56%;
+    background: linear-gradient(90deg, #67a8ff 0%, #0f62fe 100%);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(15, 98, 254, 0.35);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-item {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    padding: 1rem;
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    min-height: 120px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    color: #93c5fd;
+  }
+  .icon svg { width: 100%; height: 100%; display: block; }
+
+  .value {
+    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+
+  .label {
+    font-size: 0.95rem;
+    color: #e5e7eb;
+  }
+
+
+  @media (min-width: 900px) {
+    .stats-container { padding: 2.8rem 1rem 3rem; }
+    .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .stats-title::after { width: 40%; height: 0.24em; }
+  }
+
+  @media (max-width: 520px) {
+    .stat-item { min-height: 110px; }
+  }
+</style>
