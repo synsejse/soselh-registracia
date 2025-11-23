@@ -1,8 +1,8 @@
 ---
 // Header component with logo and contact information
-import PhoneIcon from "./icons/PhoneIcon.astro";
-import EmailIcon from "./icons/EmailIcon.astro";
-import LocationIcon from "./icons/LocationIcon.astro";
+import PhoneIcon from "./icons/phone.svg";
+import EmailIcon from "./icons/envelope.svg";
+import LocationIcon from "./icons/location-dot.svg";
 ---
 
 <header class="header">
@@ -15,7 +15,7 @@ import LocationIcon from "./icons/LocationIcon.astro";
 
         <div class="contact-info">
             <div class="contact-item">
-                <PhoneIcon />
+                <PhoneIcon width={20} height={20} fill="currentColor" />
                 <div class="contact-text">
                     <div class="contact-label">Zavolajte nám</div>
                     <a href="tel:+421903711356">(+421) 903 711 356</a>
@@ -23,7 +23,7 @@ import LocationIcon from "./icons/LocationIcon.astro";
             </div>
 
             <div class="contact-item">
-                <EmailIcon />
+                <EmailIcon width={20} height={20} fill="currentColor" />
                 <div class="contact-text">
                     <div class="contact-label">Napíšte nám</div>
                     <a href="mailto:info@sd-stavby.sk">info@sd-stavby.sk</a>
@@ -31,7 +31,7 @@ import LocationIcon from "./icons/LocationIcon.astro";
             </div>
 
             <div class="contact-item">
-                <LocationIcon />
+                <LocationIcon width={20} height={20} fill="currentColor" />
                 <div class="contact-text">
                     <div class="contact-label">Naše sídlo</div>
                     <span>Nám. sv. J. Bosca 120, Žilina-Bánová</span>
@@ -88,6 +88,7 @@ import LocationIcon from "./icons/LocationIcon.astro";
         color: #4b5563;
         line-height: 1.2;
     }
+
 
     .contact-text {
         display: flex;

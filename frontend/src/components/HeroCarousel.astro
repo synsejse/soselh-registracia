@@ -1,7 +1,7 @@
 ---
 // Hero Carousel component with image backgrounds and content slides
-import ArrowLeftIcon from "./icons/ArrowLeftIcon.astro";
-import ArrowRightIcon from "./icons/ArrowRightIcon.astro";
+import ArrowLeftIcon from "./icons/arrow-left.svg";
+import ArrowRightIcon from "./icons/arrow-right.svg";
 
 interface Slide {
     image: string;
@@ -64,10 +64,10 @@ const slides: Slide[] = [
 
         <div class="carousel-controls">
             <button class="carousel-btn prev" aria-label="Predchádzajúci slide">
-                <ArrowLeftIcon />
+                <ArrowLeftIcon width={20} height={20} fill="currentColor" />
             </button>
             <button class="carousel-btn next" aria-label="Nasledujúci slide">
-                <ArrowRightIcon />
+                <ArrowRightIcon width={20} height={20} fill="currentColor" />
             </button>
         </div>
 
@@ -202,7 +202,6 @@ const slides: Slide[] = [
         background-color: rgba(255, 255, 255, 0.3);
         border: none;
         color: white;
-        /* Use SVG icons for consistent centering; reset text metrics */
         line-height: 0;
         cursor: pointer;
         border-radius: 50%;
@@ -276,7 +275,6 @@ const slides: Slide[] = [
         .carousel-btn {
             width: 2.5rem;
             height: 2.5rem;
-            /* SVG icons handle their own size */
         }
 
         .carousel-dots {

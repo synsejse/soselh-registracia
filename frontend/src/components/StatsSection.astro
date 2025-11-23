@@ -1,9 +1,9 @@
 ---
 // Stats section with background image, dark overlay, animated counters
-import StarIcon from "./icons/StarIcon.astro";
-import UserGroupIcon from "./icons/UserGroupIcon.astro";
-import SquareCheckIcon from "./icons/SquareCheckIcon.astro";
-import CalendarIcon from "./icons/CalendarIcon.astro";
+import StarIcon from "./icons/star.svg";
+import UserGroupIcon from "./icons/user-group.svg";
+import SquareCheckIcon from "./icons/square-check.svg";
+import CalendarIcon from "./icons/calendar.svg";
 ---
 <section class="stats-section" aria-labelledby="stats-title">
   <div class="overlay"></div>
@@ -13,7 +13,7 @@ import CalendarIcon from "./icons/CalendarIcon.astro";
     <div class="stats-grid">
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <StarIcon />
+          <StarIcon width={28} height={28} fill="currentColor" />
         </div>
         <div class="value" data-target="100">0</div>
         <div class="label">Kvalita služieb</div>
@@ -21,7 +21,7 @@ import CalendarIcon from "./icons/CalendarIcon.astro";
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <UserGroupIcon />
+          <UserGroupIcon width={28} height={28} fill="currentColor" />
         </div>
         <div class="value" data-target="7500">0</div>
         <div class="label">Spokojných klientov</div>
@@ -29,7 +29,7 @@ import CalendarIcon from "./icons/CalendarIcon.astro";
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <SquareCheckIcon />
+          <SquareCheckIcon width={28} height={28} fill="currentColor" />
         </div>
         <div class="value" data-target="300">0</div>
         <div class="label">Ukončené projekty</div>
@@ -37,7 +37,7 @@ import CalendarIcon from "./icons/CalendarIcon.astro";
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <CalendarIcon />
+          <CalendarIcon width={28} height={28} fill="currentColor" />
         </div>
         <div class="value" data-target="15">0</div>
         <div class="label">Rokov na trhu</div>
@@ -171,11 +171,8 @@ import CalendarIcon from "./icons/CalendarIcon.astro";
   }
 
   .icon {
-    width: 28px;
-    height: 28px;
     color: #93c5fd;
   }
-  .icon svg { width: 100%; height: 100%; display: block; }
 
   .value {
     font-size: clamp(1.6rem, 4.5vw, 2.2rem);
