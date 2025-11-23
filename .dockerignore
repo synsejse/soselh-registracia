@@ -1,7 +1,3 @@
-# Merged root-level .dockerignore
-# These patterns are relative to the build context (repository root).
-# Prefixed paths ensure rules apply only to their respective subprojects.
-
 # --- Backend ---
 backend/target
 
