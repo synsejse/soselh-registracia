@@ -1,7 +1,10 @@
 ---
 // Stats section with background image, dark overlay, animated counters
+import StarIcon from "./icons/StarIcon.astro";
+import UserGroupIcon from "./icons/UserGroupIcon.astro";
+import SquareCheckIcon from "./icons/SquareCheckIcon.astro";
+import CalendarIcon from "./icons/CalendarIcon.astro";
 ---
-
 <section class="stats-section" aria-labelledby="stats-title">
   <div class="overlay"></div>
   <div class="stats-container">
@@ -10,8 +13,7 @@
     <div class="stats-grid">
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <!-- Star icon -->
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.77 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z"/></svg>
+          <StarIcon />
         </div>
         <div class="value" data-target="100">0</div>
         <div class="label">Kvalita služieb</div>
@@ -19,8 +21,7 @@
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <!-- Users icon -->
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.79 2.99-4S17.66 3 16 3s-3 1.79-3 4 1.34 4 3 4zm-8 0c1.66 0 3-1.79 3-4S9.66 3 8 3 5 4.79 5 7s1.34 4 3 4zm0 2c-2.67 0-8 1.34-8 4v2h10v-2c0-2.66-3.33-4-6-4zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.95v2H24v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <UserGroupIcon />
         </div>
         <div class="value" data-target="7500">0</div>
         <div class="label">Spokojných klientov</div>
@@ -28,8 +29,7 @@
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <!-- Check-square icon -->
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-9 14l-4-4 1.41-1.41L10 13.17l6.59-6.58L18 8l-8 9z"/></svg>
+          <SquareCheckIcon />
         </div>
         <div class="value" data-target="300">0</div>
         <div class="label">Ukončené projekty</div>
@@ -37,8 +37,7 @@
 
       <article class="stat-item">
         <div class="icon" aria-hidden="true">
-          <!-- Calendar icon -->
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10h5v5H7v-5zm10-7h-1V1h-2v2H10V1H8v2H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H7V8h10v11z"/></svg>
+          <CalendarIcon />
         </div>
         <div class="value" data-target="15">0</div>
         <div class="label">Rokov na trhu</div>

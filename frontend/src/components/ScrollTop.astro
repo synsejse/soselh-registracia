@@ -29,6 +29,7 @@ const {
     right = "1.25rem",
     size = 48,
 } = Astro.props;
+import ArrowUpIcon from "./icons/ArrowUpIcon.astro";
 ---
 
 <button
@@ -39,9 +40,7 @@ const {
     title={label}
     style={`--st-size:${size}px; --st-bottom:${bottom}; --st-right:${right};`}
 >
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 5l-7 7h4v7h6v-7h4l-7-7z" fill="currentColor"></path>
-    </svg>
+    <ArrowUpIcon class="icon" />
 </button>
 
 <style>
@@ -88,6 +87,13 @@ const {
         width: calc(var(--st-size) * 0.6);
         height: calc(var(--st-size) * 0.6);
         display: block;
+    }
+
+    .scroll-top .icon :global(svg) {
+        width: 100%;
+        height: 100%;
+        display: block;
+        color: currentColor;
     }
 
     @media (prefers-reduced-motion: reduce) {
