@@ -4,13 +4,15 @@
 
 <section class="contact-map" aria-labelledby="contact-map-title">
     <h2 id="contact-map-title" class="sr-only">Mapa</h2>
-    <div class="map-wrapper">
-        <iframe
-            title="Mapa - ŠD STAVBY"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2601.234567890123!2d18.720475!3d49.198772!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDnCsDExJzU1LjYiTiAxOMKwNDMnMTMuNyJF!5e0!3m2!1ssk!2ssk!4v1234567890123!5m2!1ssk!2ssk&q=N%C3%A1mestie+sv%C3%A4t%C3%A9ho+J%C3%A1na+Bosca+120/11,+Z%C3%A1vodie,+010+04+%C5%BDilina"
-            allowfullscreen
-            loading="lazy"
+    <div class="map-container">
+        <div class="map-wrapper">
+            <iframe
+                title="Mapa - ŠD STAVBY"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2601.234567890123!2d18.720475!3d49.198772!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDnCsDExJzU1LjYiTiAxOMKwNDMnMTMuNyJF!5e0!3m2!1ssk!2ssk!4v1234567890123!5m2!1ssk!2ssk&q=N%C3%A1mestie+sv%C3%A4t%C3%A9ho+J%C3%A1na+Bosca+120/11,+Z%C3%A1vodie,+010+04+%C5%BDilina"
+                allowfullscreen
+                loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
     </div>
 </section>
 
@@ -29,6 +31,12 @@
 
     .contact-map {
         padding: 0;
+    }
+    /* Constrain map width to match cards container */
+    .map-container {
+        max-width: var(--container, 1100px);
+        margin: 2rem auto; /* add vertical space above and below the map */
+        padding: 0 1rem; /* horizontal padding to align with cards container */
     }
     .map-wrapper {
         width: 100%;
