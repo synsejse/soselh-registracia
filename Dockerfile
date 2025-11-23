@@ -3,8 +3,9 @@
 ###############################################
 FROM node:25-bookworm-slim AS frontend-builder
 WORKDIR /app/frontend
-COPY frontend/ ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
+COPY frontend/ ./
 RUN npm run build
 
 ##############################################
