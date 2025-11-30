@@ -13,7 +13,7 @@ import CalendarIcon from "../icons/calendar.svg";
         <div class="stats-grid">
             <article class="stat-item">
                 <div class="icon" aria-hidden="true">
-                    <StarIcon width={28} height={28} fill="currentColor" />
+                    <StarIcon width={28} height={28} fill="currentColor"/>
                 </div>
                 <div class="value" data-target="100">0</div>
                 <div class="label">Kvalita služieb</div>
@@ -21,7 +21,7 @@ import CalendarIcon from "../icons/calendar.svg";
 
             <article class="stat-item">
                 <div class="icon" aria-hidden="true">
-                    <UserGroupIcon width={28} height={28} fill="currentColor" />
+                    <UserGroupIcon width={28} height={28} fill="currentColor"/>
                 </div>
                 <div class="value" data-target="7500">0</div>
                 <div class="label">Spokojných klientov</div>
@@ -29,7 +29,7 @@ import CalendarIcon from "../icons/calendar.svg";
 
             <article class="stat-item">
                 <div class="icon" aria-hidden="true">
-                    <SquareCheckIcon width={28} height={28} fill="currentColor" />
+                    <SquareCheckIcon width={28} height={28} fill="currentColor"/>
                 </div>
                 <div class="value" data-target="300">0</div>
                 <div class="label">Ukončené projekty</div>
@@ -37,7 +37,7 @@ import CalendarIcon from "../icons/calendar.svg";
 
             <article class="stat-item">
                 <div class="icon" aria-hidden="true">
-                    <CalendarIcon width={28} height={28} fill="currentColor" />
+                    <CalendarIcon width={28} height={28} fill="currentColor"/>
                 </div>
                 <div class="value" data-target="15">0</div>
                 <div class="label">Rokov na trhu</div>
@@ -92,7 +92,7 @@ import CalendarIcon from "../icons/calendar.svg";
                                 io.disconnect();
                             }
                         });
-                    }, { threshold: 0.25 });
+                    }, {threshold: 0.25});
                     io.observe(section);
                 } else {
                     // Fallback: start immediately with animation (no IO support)
@@ -101,7 +101,7 @@ import CalendarIcon from "../icons/calendar.svg";
             };
 
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', run, { once: true });
+                document.addEventListener('DOMContentLoaded', run, {once: true});
             } else {
                 run();
             }
@@ -139,6 +139,7 @@ import CalendarIcon from "../icons/calendar.svg";
         display: inline-block;
         padding-bottom: 0.15em;
     }
+
     .stats-title::after {
         content: '';
         position: absolute;
@@ -188,12 +189,24 @@ import CalendarIcon from "../icons/calendar.svg";
 
 
     @media (min-width: 900px) {
-        .stats-container { padding: 2.8rem 1rem 3rem; }
-        .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .stats-title::after { width: 40%; height: 0.24em; }
+        .stats-container {
+            padding: 2.8rem 1rem 3rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .stats-title::after {
+            width: 40%;
+            height: 0.24em;
+        }
     }
 
     @media (max-width: 520px) {
-        .stat-item { min-height: 110px; }
+        .stat-item {
+            min-height: 110px;
+        }
     }
 </style>

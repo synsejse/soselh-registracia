@@ -33,14 +33,14 @@ import ArrowUpIcon from "../icons/arrow-up.svg";
 ---
 
 <button
-    id="scrollTop"
-    data-threshold={threshold}
-    class="scroll-top"
-    aria-label={label}
-    title={label}
-    style={`--st-size:${size}px; --st-bottom:${bottom}; --st-right:${right};`}
+        id="scrollTop"
+        data-threshold={threshold}
+        class="scroll-top"
+        aria-label={label}
+        title={label}
+        style={`--st-size:${size}px; --st-bottom:${bottom}; --st-right:${right};`}
 >
-    <ArrowUpIcon width={Math.round(size * 0.6)} height={Math.round(size * 0.6)} fill="currentColor" />
+    <ArrowUpIcon width={Math.round(size * 0.6)} height={Math.round(size * 0.6)} fill="currentColor"/>
 </button>
 
 <style>
@@ -57,10 +57,9 @@ import ArrowUpIcon from "../icons/arrow-up.svg";
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         display: none; /* toggled via .show */
-        transition:
-            opacity 0.3s ease,
-            transform 0.3s ease,
-            background-color 0.2s ease;
+        transition: opacity 0.3s ease,
+        transform 0.3s ease,
+        background-color 0.2s ease;
         z-index: 1000;
         padding: 0;
         line-height: 1;
@@ -78,9 +77,8 @@ import ArrowUpIcon from "../icons/arrow-up.svg";
 
     .scroll-top:focus-visible {
         outline: none;
-        box-shadow:
-            0 0 0 3px rgba(15, 98, 254, 0.2),
-            0 4px 12px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.2),
+        0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
 
@@ -105,13 +103,13 @@ import ArrowUpIcon from "../icons/arrow-up.svg";
             }
         }
 
-        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("scroll", onScroll, {passive: true});
         // Initialize state on load
         onScroll();
 
         btn?.addEventListener("click", () => {
             try {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.scrollTo({top: 0, behavior: "smooth"});
             } catch {
                 // Fallback for older browsers
                 window.scrollTo(0, 0);

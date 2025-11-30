@@ -42,49 +42,50 @@ const slides: Slide[] = [
         <div class="slides-wrapper">
             {
                 slides.map((slide, index) => (
-                    <div class="slide" data-slide={index}>
-                        <img
-                            src={slide.image}
-                            alt={slide.title}
-                            class="slide-image"
-                            loading="lazy"
-                        />
-                        <div class="slide-overlay" />
-                        <div class="slide-content">
-                            <h1 class="slide-title">{slide.title}</h1>
-                            <p class="slide-description">{slide.description}</p>
-                            <a href="/about" class="slide-button">
-                                Dozvedieť sa viac
-                            </a>
+                        <div class="slide" data-slide={index}>
+                            <img
+                                    src={slide.image}
+                                    alt={slide.title}
+                                    class="slide-image"
+                                    loading="lazy"
+                            />
+                            <div class="slide-overlay"/>
+                            <div class="slide-content">
+                                <h1 class="slide-title">{slide.title}</h1>
+                                <p class="slide-description">{slide.description}</p>
+                                <a href="/about" class="slide-button">
+                                    Dozvedieť sa viac
+                                </a>
+                            </div>
                         </div>
-                    </div>
                 ))
             }
         </div>
 
         <div class="carousel-controls">
             <button class="carousel-btn prev" aria-label="Predchádzajúci slide">
-                <ArrowLeftIcon width={20} height={20} fill="currentColor" />
+                <ArrowLeftIcon width={20} height={20} fill="currentColor"/>
             </button>
             <button class="carousel-btn next" aria-label="Nasledujúci slide">
-                <ArrowRightIcon width={20} height={20} fill="currentColor" />
+                <ArrowRightIcon width={20} height={20} fill="currentColor"/>
             </button>
         </div>
 
         <div class="carousel-dots">
             {
                 slides.map((_, index) => (
-                    <button
-                        class="dot"
-                        data-slide={index}
-                        aria-label={`Slide ${index + 1}`}
-                        aria-current={index === 0 ? "true" : "false"}
-                    />
+                        <button
+                                class="dot"
+                                data-slide={index}
+                                aria-label={`Slide ${index + 1}`}
+                                aria-current={index === 0 ? "true" : "false"}
+                        />
                 ))
             }
         </div>
 
-        <div class="carousel-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        <div class="carousel-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="0"></div>
     </div>
 </section>
 
@@ -245,7 +246,7 @@ const slides: Slide[] = [
 
         const ready = (fn) => {
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', fn, { once: true });
+                document.addEventListener('DOMContentLoaded', fn, {once: true});
             } else {
                 fn();
             }
@@ -375,4 +376,4 @@ const slides: Slide[] = [
             schedule();
         });
     })();
- </script>
+</script>
