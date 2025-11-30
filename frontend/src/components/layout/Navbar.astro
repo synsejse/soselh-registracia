@@ -145,20 +145,16 @@
             background-color: #1f2937;
             flex-direction: column;
             gap: 0;
-            padding: 0.5rem 0;
+            padding: 0;
             border-top: 1px solid rgba(255, 255, 255, 0.15);
-            max-height: 0;
             opacity: 0;
             pointer-events: none;
-            overflow: hidden;
-            transition: max-height 0.3s ease,
-            opacity 0.3s ease;
+            transition: opacity 0.3s ease;
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-            will-change: max-height, opacity;
+            will-change: opacity;
         }
 
         .nav-menu.active {
-            max-height: 26rem;
             opacity: 1;
             pointer-events: auto;
         }
