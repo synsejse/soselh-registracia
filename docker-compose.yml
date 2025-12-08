@@ -1,46 +1,46 @@
 services:
-  db:
-    image: mariadb:12
-    container_name: website_mariadb
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      MARIADB_DATABASE: ${DB_DATABASE}
-      MARIADB_USER: ${DB_USER}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - mariadb_data:/var/lib/mysql
-    expose:
-      - "3306"
-    networks:
-      - website_network
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # db:
+  #   image: mariadb:12
+  #   container_name: website_mariadb
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     MARIADB_DATABASE: ${DB_DATABASE}
+  #     MARIADB_USER: ${DB_USER}
+  #     MARIADB_PASSWORD: ${DB_PASSWORD}
+  #     MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+  #   volumes:
+  #     - mariadb_data:/var/lib/mysql
+  #   expose:
+  #     - "3306"
+  #   networks:
+  #     - website_network
+  #   healthcheck:
+  #     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    container_name: website_phpmyadmin
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_USER: ${DB_USER}
-      PMA_PASSWORD: ${DB_PASSWORD}
-      UPLOAD_LIMIT: 300M
-    ports:
-      - "8081:80"
-    networks:
-      - website_network
-    depends_on:
-      db:
-        condition: service_healthy
+  # phpmyadmin:
+  #   image: phpmyadmin:latest
+  #   container_name: website_phpmyadmin
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     PMA_HOST: db
+  #     PMA_PORT: 3306
+  #     PMA_USER: ${DB_USER}
+  #     PMA_PASSWORD: ${DB_PASSWORD}
+  #     UPLOAD_LIMIT: 300M
+  #   ports:
+  #     - "8081:80"
+  #   networks:
+  #     - website_network
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
 
   app:
     build:
@@ -51,20 +51,20 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_DATABASE}"
+      # DATABASE_URL: "mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_DATABASE}"
       ROCKET_ADDRESS: 0.0.0.0
       ROCKET_PORT: 8080
     ports:
       - "8080:8080"
     networks:
       - website_network
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
 
-volumes:
-  mariadb_data:
-    driver: local
+# volumes:
+#   mariadb_data:
+#     driver: local
 
 networks:
   website_network:
