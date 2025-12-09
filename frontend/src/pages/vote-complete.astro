@@ -1,109 +1,105 @@
 ---
 import Layout from "../layouts/Layout.astro";
-const voterNumber = 67;
 ---
 
 <Layout title="Hlasovanie 4.B">
-  <main class="voting-container">
-    <span class="voting-title">Hlasovanie 4.B</span>
-    <div class="divider"></div>
-    <span class="tick">✅</span>
-    <span class="main-text">Ďakujeme za hlasovanie.</span>
-    <span class="main-text">Vaše číslo: {voterNumber}</span>
-    <div class="divider"></div>
-    <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
-  </main>
+    <main class="voting-container">
+        <span class="voting-title">Hlasovanie 4.B</span>
+        <div class="divider"></div>
+        <span class="tick">✅</span>
+        <span class="main-text">Ďakujeme za hlasovanie.</span>
+
+        <div class="id-container">
+            <span class="voter-id-label">Vaše ID:</span>
+            <span id="voter-id" class="voter-id">...</span>
+        </div>
+
+        <div class="divider"></div>
+        <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
+    </main>
+
+    <script>
+        import { api } from "../lib/api";
+
+        async function loadVoterId() {
+            try {
+                const session = await api.getSession();
+                const voterIdElement = document.getElementById("voter-id");
+                if (voterIdElement) {
+                    voterIdElement.textContent = session.voter_id;
+                }
+            } catch (error) {
+                console.error("Error loading voter ID:", error);
+            }
+        }
+
+        loadVoterId();
+    </script>
 </Layout>
 
 <style>
-  main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100%;
-    gap: 1.5rem;
-  }
+    main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100%;
+        gap: 1.5rem;
+    }
 
-  .voting-footer {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #666666;
-  }
+    .voting-footer {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        color: #666666;
+    }
 
-  .main-text {
-    font-family: "Inter", sans-serif;
-    font-size: 20px;
-    color: #111111;
-  }
+    .main-text {
+        font-family: "Inter", sans-serif;
+        font-size: 20px;
+        color: #111111;
+    }
 
-  .tick {
-    font-family: "Inter", sans-serif;
-    font-size: 50px;
-  }
+    .id-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
 
-  .voting-title {
-    font-family: "Inter", sans-serif;
-    font-size: 40px;
-    font-weight: 200;
-    text-align: center;
-    color: #1a1a1a;
-  }
+    .voter-id-label {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        color: #666666;
+    }
 
-  .divider {
-    width: 60px;
-    height: 4px;
-    background-color: #D4AF37;
-    border-radius: 2px;
-  }
+    .voter-id {
+        font-family: "Inter", sans-serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: #d4af37;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
 
-  .options-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 1.5rem 0;
-  }
+    .tick {
+        font-family: "Inter", sans-serif;
+        font-size: 50px;
+    }
 
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #1a1a1a;
-    cursor: pointer;
-    user-select: none;
-  }
+    .voting-title {
+        font-family: "Inter", sans-serif;
+        font-size: 40px;
+        font-weight: 200;
+        text-align: center;
+        color: #1a1a1a;
+    }
 
-  .radio-option input[type="radio"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: #D4AF37;
-  }
-
-  .submit-btn {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #D4AF37;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem 2.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 1rem;
-  }
-
-  .submit-btn:hover {
-    background-color: #f5cb40;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
-  }
-
-  .submit-btn:active {
-    transform: translateY(0);
-  }
+    .divider {
+        width: 60px;
+        height: 4px;
+        background-color: #d4af37;
+        border-radius: 2px;
+    }
 </style>

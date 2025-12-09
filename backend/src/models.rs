@@ -1,51 +1,106 @@
-// Data models for contact messages
+use chrono::NaiveDateTime;
+use rocket::serde::{Deserialize, Serialize};
+use rocket_db_pools::diesel::prelude::*;
 
-// use rocket::form::FromForm;
-// use rocket::serde::{Deserialize, Serialize};
-// use rocket_db_pools::diesel::prelude::*;
+use crate::schema::{candidates, settings, votes, voting_sessions};
 
-// use crate::schema::messages;
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name = voting_sessions)]
+pub struct VotingSession {
+    pub session_token: String,
+    pub display_name: String,
+    pub ip_address: Option<String>,
+    pub created_at: Option<NaiveDateTime>,
+    pub voter_id: String,
+}
 
-// /// Form data received from the contact form
-// #[derive(Debug, Clone, Deserialize, Serialize, FromForm)]
-// #[serde(crate = "rocket::serde")]
-// pub struct ContactMessageForm {
-//     pub company: Option<String>, // Anti-bot honeypot field
-//     pub name: String,
-//     pub email: String,
-//     pub phone: Option<String>,
-//     pub subject: Option<String>,
-//     pub message: String,
-// }
+#[derive(Debug, Clone, Insertable)]
+#[diesel(table_name = voting_sessions)]
+pub struct NewVotingSession {
+    pub session_token: String,
+    pub display_name: String,
+    pub ip_address: Option<String>,
+    pub voter_id: String,
+}
 
-// /// Database representation of a contact message
-// #[derive(Insertable)]
-// #[diesel(table_name = messages)]
-// pub struct ContactMessage {
-//     pub id: Option<i64>,
-//     pub name: String,
-//     pub email: String,
-//     pub phone: Option<String>,
-//     pub subject: Option<String>,
-//     pub message: String,
-// }
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name = candidates)]
+pub struct Candidate {
+    pub id: i32,
+    pub name: String,
+}
 
-// impl From<ContactMessageForm> for ContactMessage {
-//     fn from(form: ContactMessageForm) -> Self {
-//         ContactMessage {
-//             id: None,
-//             name: form.name,
-//             email: form.email,
-//             phone: form.phone,
-//             subject: form.subject,
-//             message: form.message,
-//         }
-//     }
-// }
+#[derive(Debug, Clone, Insertable)]
+#[diesel(table_name = candidates)]
+pub struct NewCandidate {
+    pub name: String,
+}
 
-// impl ContactMessageForm {
-//     /// Check if this submission is likely from a bot
-//     pub fn is_bot(&self) -> bool {
-//         self.company.as_ref().is_some_and(|c| !c.is_empty())
-//     }
-// }
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name = votes)]
+pub struct Vote {
+    pub id: i32,
+    pub session_token: String,
+    pub candidate_id: i32,
+    pub voted_at: Option<NaiveDateTime>,
+}
+
+#[derive(Debug, Clone, Insertable)]
+#[diesel(table_name = votes)]
+pub struct NewVote {
+    pub session_token: String,
+    pub candidate_id: i32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name = settings)]
+pub struct Setting {
+    pub key_name: String,
+    pub value: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CreateSessionRequest {
+    pub name: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CastVoteRequest {
+    pub candidate_id: i32,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UpdateVotingStatusRequest {
+    pub action: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CandidateResult {
+    pub name: String,
+    pub votes: i64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct LotteryWinner {
+    pub name: String,
+    pub voter_id: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct VotingStatusResponse {
+    pub ready: bool,
+    pub has_voted: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct SessionInfoResponse {
+    pub voter_id: String,
+    pub name: String,
+}

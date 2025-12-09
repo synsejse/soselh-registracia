@@ -2,193 +2,242 @@
 import Layout from "../../layouts/Layout.astro";
 
 const joinLink = "lnk.sk/mozi5";
-const voterCount = 67;
 const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinLink)}`;
 ---
 
 <Layout title="Hlasovanie 4.B - Prezentér">
-  <main class="presenter-container">
-    <header class="presenter-header">
-      <span class="presenter-title">Hlasovanie 4.B</span>
-    </header>
+    <main class="presenter-container">
+        <header class="presenter-header">
+            <span class="presenter-title">Hlasovanie 4.B</span>
+        </header>
 
-    <div class="presenter-content">
-      <div class="left-section">
-        <span class="section-label">Pripojte sa:</span>
-        <span class="join-link">{joinLink}</span>
-        <div class="qr-code-container">
-          <img src={qrCodeUrl} alt="QR Code" class="qr-code" />
+        <div class="presenter-content">
+            <div class="left-section">
+                <span class="section-label">Pripojte sa:</span>
+                <span class="join-link">{joinLink}</span>
+                <div class="qr-code-container">
+                    <img src={qrCodeUrl} alt="QR Code" class="qr-code" />
+                </div>
+            </div>
+
+            <div class="divider-vertical"></div>
+
+            <div class="right-section">
+                <span class="vote-count"
+                    >Počet hlasov: <span id="voter-count">0</span></span
+                >
+                <button id="start-btn" class="start-btn">
+                    <span>Začať hlasovanie</span>
+                </button>
+                <a href="/presenter/chart" class="chart-link"
+                    >Zobraziť výsledky</a
+                >
+            </div>
         </div>
-      </div>
+    </main>
 
-      <div class="divider-vertical"></div>
+    <script>
+        import { api } from "../../lib/api";
 
-      <div class="right-section">
-        <span class="vote-count">Počet hlasujúcich: {voterCount}</span>
-        <button class="start-btn">
-          <span>Začať</span>
-        </button>
-      </div>
-    </div>
-  </main>
+        async function startVoting() {
+            const btn = document.getElementById(
+                "start-btn",
+            ) as HTMLButtonElement;
+            if (!btn) return;
 
-  <script>
-    async function startVoting() {
-      try {
-        const response = await fetch("/api/voting/status", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "start",
-            ready: true,
-          }),
-        });
+            try {
+                btn.disabled = true;
+                btn.textContent = "Spúšťam...";
 
-        if (response.ok) {
-          // Redirect to chart after successful API call
-          window.location.href = "/presenter/chart";
-        } else {
-          console.error("Failed to start voting:", response.statusText);
+                await api.admin.setStatus("start");
+
+                btn.textContent = "Hlasovanie spustené";
+                btn.classList.add("active");
+            } catch (error) {
+                console.error("Error starting voting:", error);
+                btn.disabled = false;
+                btn.textContent = "Začať hlasovanie";
+                alert("Chyba pri komunikácii so serverom.");
+            }
         }
-      } catch (error) {
-        console.error("Error starting voting:", error);
-      }
-    }
 
-    function setupStartButton() {
-      const btn = document.querySelector(".start-btn");
-      if (btn) {
-        btn.addEventListener("click", startVoting);
-      }
-    }
+        async function updateStats() {
+            try {
+                const count = await api.admin.getStats();
+                const el = document.getElementById("voter-count");
+                if (el) el.textContent = count.toString();
+            } catch (e) {
+                console.error("Error fetching stats", e);
+            }
+        }
 
-    // Initialize when DOM is ready
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", setupStartButton);
-    } else {
-      setupStartButton();
-    }
-  </script>
+        async function checkStatus() {
+            const btn = document.getElementById(
+                "start-btn",
+            ) as HTMLButtonElement;
+            if (!btn) return;
 
-<style>
-  main {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100%;
-    background-color: #ffffff;
-  }
+            try {
+                const status = await api.getStatus();
+                if (status.ready) {
+                    btn.textContent = "Hlasovanie spustené";
+                    btn.classList.add("active");
+                    btn.disabled = true;
+                }
+            } catch (e) {
+                console.error("Error checking status", e);
+            }
+        }
 
-  .presenter-header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    border-bottom: 1px solid #e5e5e5;
-  }
+        // Initialize
+        const btn = document.getElementById("start-btn");
+        if (btn) {
+            btn.addEventListener("click", startVoting);
+        }
 
-  .presenter-title {
-    font-family: "Inter", sans-serif;
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
+        checkStatus();
+        updateStats();
+        setInterval(updateStats, 2000);
+    </script>
 
-  .presenter-content {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4rem;
-    gap: 2rem;
-  }
+    <style>
+        main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            background-color: #ffffff;
+        }
 
-  .left-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    flex: 1;
-  }
+        .presenter-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
 
-  .section-label {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #666666;
-    font-weight: 500;
-  }
+        .presenter-title {
+            font-family: "Inter", sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
 
-  .join-link {
-    font-family: "Inter", sans-serif;
-    font-size: 2rem;
-    color: #D4AF37;
-    font-weight: 600;
-  }
+        .presenter-content {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4rem;
+            gap: 2rem;
+        }
 
-  .qr-code-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1.5rem;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    margin-top: 1rem;
-  }
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+        }
 
-  .qr-code {
-    width: 200px;
-    height: 200px;
-    border-radius: 8px;
-  }
+        .section-label {
+            font-family: "Inter", sans-serif;
+            font-size: 1rem;
+            color: #666666;
+            font-weight: 500;
+        }
 
-  .divider-vertical {
-    width: 4px;
-    height: 200px;
-    background-color: #D4AF37;
-    border-radius: 2px;
-  }
+        .join-link {
+            font-family: "Inter", sans-serif;
+            font-size: 2rem;
+            color: #d4af37;
+            font-weight: 600;
+        }
 
-  .right-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-  }
+        .qr-code-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 1rem;
+            width: fit-content;
+        }
 
-  .vote-count {
-    font-family: "Inter", sans-serif;
-    font-size: 1.5rem;
-    color: #1a1a1a;
-    font-weight: 600;
-  }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            border-radius: 8px;
+        }
 
-  .start-btn {
-    font-family: "Inter", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #D4AF37;
-    border: none;
-    border-radius: 8px;
-    padding: 1rem 3rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
+        .divider-vertical {
+            width: 4px;
+            height: 200px;
+            background-color: #d4af37;
+            border-radius: 2px;
+        }
 
-  .start-btn:hover {
-    background-color: #f5cb40;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
-  }
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            flex: 1;
+            align-items: center;
+            justify-content: center;
+        }
 
-  .start-btn:active {
-    transform: translateY(0);
-  }
-</style>
+        .vote-count {
+            font-family: "Inter", sans-serif;
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .start-btn {
+            font-family: "Inter", sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #d4af37;
+            border: none;
+            border-radius: 8px;
+            padding: 1rem 3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background-color: #f5cb40;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
+        }
+
+        .start-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .start-btn:disabled {
+            background-color: #ccc;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .start-btn.active {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .chart-link {
+            font-family: "Inter", sans-serif;
+            color: #666;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</Layout>

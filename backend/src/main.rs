@@ -3,39 +3,55 @@
 #[macro_use]
 extern crate rocket;
 
-// mod db;
-// mod models;
+mod db;
+mod models;
 mod routes;
-// mod schema;
+mod schema;
 
-// use rocket::fairing::AdHoc;
+use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
-// use rocket_db_pools::Database;
+use rocket_db_pools::Database;
 
-// use db::MessagesDB;
-// use routes::contact;
+use db::VotingDB;
+use routes::voting;
 
 #[rocket::launch]
 fn rocket() -> _ {
-    // let database_url =
-    //     std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable must be set");
+    let mut figment = rocket::config::Config::figment();
 
-    // let figment = rocket::config::Config::figment().merge((
-    //     "databases.messages_db",
-    //     rocket_db_pools::Config {
-    //         url: database_url,
-    //         min_connections: None,
-    //         max_connections: 1024,
-    //         connect_timeout: 3,
-    //         idle_timeout: None,
-    //         extensions: None,
-    //     },
-    // ));
+    // Allow setting database URL via environment variable
+    if let Ok(database_url) = std::env::var("DATABASE_URL") {
+        figment = figment.merge((
+            "databases.voting_db",
+            rocket_db_pools::Config {
+                url: database_url,
+                min_connections: None,
+                max_connections: 1024,
+                connect_timeout: 3,
+                idle_timeout: None,
+                extensions: None,
+            },
+        ));
+    }
 
-    rocket::build()
-        // .attach(MessagesDB::init())
-        // .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
-        // .mount("/", routes![contact::submit_message])
+    rocket::custom(figment)
+        .attach(VotingDB::init())
+        .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
+        .attach(AdHoc::on_ignite("Database Seeding", db::run_seeding))
+        .mount(
+            "/api",
+            routes![
+                voting::client::create_session,
+                voting::client::get_session_info,
+                voting::client::get_candidates,
+                voting::client::cast_vote,
+                voting::client::get_vote_status,
+                voting::admin::set_voting_status,
+                voting::admin::get_stats,
+                voting::admin::get_results,
+                voting::admin::pick_winner
+            ],
+        )
         .mount("/", FileServer::from("/app/static"))
         .register("/", catchers![routes::not_found])
 }

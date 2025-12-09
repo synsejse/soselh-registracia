@@ -3,94 +3,162 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Hlasovanie 4.B">
-  <main class="voting-container">
-    <span class="voting-title">Hlasovanie 4.B</span>
-    <div class="divider"></div>
-    <input
-      type="text"
-      class="name-input"
-      placeholder="Zadajte meno"
-      aria-label="Zadajte meno"
-    />
-    <button class="submit-btn">Vstúpiť do hlasovania</button>
-    <div class="divider"></div>
-    <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
-  </main>
+    <main class="voting-container">
+        <span class="voting-title">Hlasovanie 4.B</span>
+        <div class="divider"></div>
+        <input
+            type="text"
+            id="name-input"
+            class="name-input"
+            placeholder="Zadajte meno"
+            aria-label="Zadajte meno"
+        />
+        <button id="submit-btn" class="submit-btn">Vstúpiť do hlasovania</button
+        >
+        <div class="divider"></div>
+        <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
+    </main>
+
+    <script>
+        import { api } from "../lib/api";
+
+        const submitBtn = document.getElementById("submit-btn");
+        const nameInput = document.getElementById(
+            "name-input",
+        ) as HTMLInputElement;
+
+        async function checkStatus() {
+            try {
+                const status = await api.getStatus();
+                if (!status.ready) {
+                    window.location.href = "/";
+                    return;
+                }
+                if (status.has_voted) {
+                    window.location.href = "/vote-complete";
+                    return;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function handleLogin() {
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert("Prosím zadajte meno.");
+                return;
+            }
+
+            try {
+                submitBtn.setAttribute("disabled", "true");
+                await api.createSession(name);
+                window.location.href = "/vote";
+            } catch (error) {
+                console.error("Error during login:", error);
+                alert(
+                    "Nepodarilo sa vytvoriť reláciu. Skúste to prosím znova.",
+                );
+                submitBtn.removeAttribute("disabled");
+            }
+        }
+
+        if (submitBtn && nameInput) {
+            submitBtn.addEventListener("click", handleLogin);
+
+            nameInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    handleLogin();
+                }
+            });
+        }
+
+        // Check status on load
+        checkStatus();
+    </script>
 </Layout>
 
 <style>
-  main {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100%;
-    gap: 1.5rem;
-  }
-.submit-btn {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #D4AF37;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem 2.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+    main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100%;
+        gap: 1.5rem;
+    }
+    .submit-btn {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: #d4af37;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
 
-  .submit-btn:hover {
-    background-color: #f5cb40;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
-  }
+    .submit-btn:hover {
+        background-color: #f5cb40;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
+    }
 
-  .submit-btn:active {
-    transform: translateY(0);
-  }
+    .submit-btn:active {
+        transform: translateY(0);
+    }
 
-  .voting-title {
-    font-family: "Inter", sans-serif;
-    font-size: 40px;
-    font-weight: 200;
-    text-align: center;
-    color: #1a1a1a;
-  }
-  .name-input {
-    font-family: "Inter", sans-serif;
-    font-size: 1.25rem;
-    text-align: center;
-    color: #1a1a1a;
-    border: 1px solid #d0d0d0;
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    width: 350px;
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-  }
+    .submit-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 
-  .name-input::placeholder {
-    color: #999999;
-  }
+    .voting-title {
+        font-family: "Inter", sans-serif;
+        font-size: 40px;
+        font-weight: 200;
+        text-align: center;
+        color: #1a1a1a;
+    }
+    .name-input {
+        font-family: "Inter", sans-serif;
+        font-size: 1.25rem;
+        text-align: center;
+        color: #1a1a1a;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        width: 350px;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
 
-  .name-input:focus {
-    outline: none;
-    border-color: #D4AF37;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
+    .name-input::placeholder {
+        color: #999999;
+    }
 
-  .divider {
-    width: 60px;
-    height: 4px;
-    background-color: #D4AF37;
-    border-radius: 2px;
-  }
+    .name-input:focus {
+        outline: none;
+        border-color: #d4af37;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
 
-  .voting-footer {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #666666;
-  }
+    .divider {
+        width: 60px;
+        height: 4px;
+        background-color: #d4af37;
+        border-radius: 2px;
+    }
+
+    .voting-footer {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        color: #666666;
+    }
 </style>

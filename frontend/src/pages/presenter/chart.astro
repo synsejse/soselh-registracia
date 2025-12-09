@@ -1,247 +1,299 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-
-const voted = 20;
-const waiting = 78;
 ---
 
 <Layout title="Hlasovanie 4.B - Grafika">
-  <main class="chart-container">
-    <header class="chart-header">
-      <span class="chart-title">Hlasovanie 4.B</span>
-      <span class="chart-stats">Počet hlasov: <span class="stat-value">{voted}</span> | Nehlasovalo: <span class="stat-value">{waiting}</span></span>
-      <button class="evaluate-btn">Vyhodnotiť</button>
-    </header>
-    <div class="chart-wrapper">
-      <canvas id="voteChart"></canvas>
-    </div>
-  </main>
+    <main class="chart-container">
+        <header class="chart-header">
+            <span class="chart-title">Hlasovanie 4.B</span>
+            <span class="chart-stats"
+                >Počet hlasov: <span id="total-votes" class="stat-value">0</span
+                ></span
+            >
+            <button id="evaluate-btn" class="evaluate-btn">Vyhodnotiť</button>
+        </header>
+        <div class="chart-wrapper">
+            <canvas id="voteChart"></canvas>
+        </div>
+    </main>
 
-  <script>
-    import Chart from "chart.js/auto";
+    <script>
+        import Chart from "chart.js/auto";
+        import { api } from "../../lib/api";
 
-    let chartInstance = null;
-    let isEvaluated = false;
+        let chartInstance: Chart | null = null;
+        let isEvaluated = false;
 
-    // Data that will be updated from database
-    const chartData = {
-      labels: ["Vstup 1", "Vstup 2", "Vstup 3", "Vstup 4", "Vstup 5"],
-      datasets: [
-        {
-          label: "Počet hlasov",
-          data: [20, 19, 8, 15, 10],
-          backgroundColor: "#D4AF37",
-          borderColor: "#D4AF37",
-          borderWidth: 1,
-          borderRadius: 6,
-        },
-      ],
-    };
+        // Initial empty data
+        const chartData = {
+            labels: [],
+            datasets: [
+                {
+                    label: "Počet hlasov",
+                    data: [],
+                    backgroundColor: "#D4AF37",
+                    borderColor: "#D4AF37",
+                    borderWidth: 1,
+                    borderRadius: 6,
+                },
+            ],
+        };
 
-    // Plugin to display values on bars
-    const dataLabelsPlugin = {
-      afterDatasetsDraw(chart) {
-        if (isEvaluated) return; // Skip drawing labels if evaluated
+        // Plugin to display values on bars
+        const dataLabelsPlugin = {
+            id: "dataLabels",
+            afterDatasetsDraw(chart: Chart) {
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    if (!meta.hidden) {
+                        meta.data.forEach((element, index) => {
+                            const ctx = chart.ctx;
+                            const value = dataset.data[index];
 
-        chart.data.datasets.forEach((dataset, datasetIndex) => {
-          const meta = chart.getDatasetMeta(datasetIndex);
-          if (!meta.hidden) {
-            meta.data.forEach((element, index) => {
-              const ctx = chart.ctx;
-              const value = dataset.data[index];
+                            // @ts-ignore
+                            const { x, y } = element;
 
-              ctx.fillStyle = "#1a1a1a";
-              ctx.font = 'bold 14px "Inter", sans-serif';
-              ctx.textAlign = "center";
-              ctx.textBaseline = "bottom";
+                            ctx.fillStyle = "#1a1a1a";
+                            ctx.font = 'bold 14px "Inter", sans-serif';
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "bottom";
 
-              const padding = 5;
-              ctx.fillText(value, element.x, element.y - padding);
+                            const padding = 5;
+                            ctx.fillText(value as string, x, y - padding);
+                        });
+                    }
+                });
+            },
+        };
+
+        // Initialize Chart.js
+        function initChart() {
+            const ctx = document.getElementById(
+                "voteChart",
+            ) as HTMLCanvasElement;
+            if (ctx) {
+                chartInstance = new Chart(ctx, {
+                    type: "bar",
+                    data: chartData,
+                    plugins: [dataLabelsPlugin],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 14,
+                                        weight: "600",
+                                    },
+                                    color: "#1a1a1a",
+                                    padding: 20,
+                                },
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 12,
+                                    },
+                                    color: "#666666",
+                                    stepSize: 1,
+                                },
+                                grid: {
+                                    color: "rgba(0, 0, 0, 0.05)",
+                                    drawBorder: false,
+                                },
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        family: "'Inter', sans-serif",
+                                        size: 12,
+                                    },
+                                    color: "#666666",
+                                },
+                                grid: {
+                                    display: false,
+                                    drawBorder: false,
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const results = await api.admin.getResults();
+
+                if (chartInstance) {
+                    const labels = results.map((r) => r.name);
+                    const data = results.map((r) => r.votes);
+                    const totalVotes = data.reduce(
+                        (a: number, b: number) => a + b,
+                        0,
+                    );
+
+                    chartInstance.data.labels = labels;
+                    chartInstance.data.datasets[0].data = data;
+                    chartInstance.update();
+
+                    const totalEl = document.getElementById("total-votes");
+                    if (totalEl) totalEl.textContent = totalVotes.toString();
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        // Handle evaluate button click
+        async function evaluateVotes() {
+            const btn = document.getElementById("evaluate-btn");
+            if (!btn) return;
+
+            // First click: Stop voting and show final results (if not already stopped)
+            // For now, we just stop polling and prepare for lottery
+            isEvaluated = true;
+
+            // Stop voting on server
+            try {
+                await api.admin.setStatus("stop");
+            } catch (e) {
+                console.error("Failed to stop voting", e);
+            }
+
+            // Update chart to show equal numbers (fun reveal)
+            if (chartInstance) {
+                const count = chartInstance.data.labels?.length || 0;
+                // Set all to 100% or just a high number
+                const equalData = new Array(count).fill(100);
+
+                chartInstance.data.datasets[0].data = equalData;
+
+                // Hide Y axis to make it look cleaner
+                if (chartInstance.options.scales?.y) {
+                    chartInstance.options.scales.y.display = false;
+                }
+
+                chartInstance.update();
+            }
+
+            // Change button to "Lottery"
+            btn.textContent = "Prejsť na lotériu";
+            btn.removeEventListener("click", evaluateVotes);
+            btn.addEventListener("click", redirectToLottery);
+        }
+
+        function redirectToLottery() {
+            window.location.href = "/presenter/lottery";
+        }
+
+        // Initialize chart when DOM is ready
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", () => {
+                initChart();
+                fetchData();
+                // Poll for updates every 2 seconds until evaluated
+                const interval = setInterval(() => {
+                    if (!isEvaluated) fetchData();
+                    else clearInterval(interval);
+                }, 2000);
+
+                const btn = document.getElementById("evaluate-btn");
+                if (btn) btn.addEventListener("click", evaluateVotes);
             });
-          }
-        });
-      },
-    };
+        } else {
+            initChart();
+            fetchData();
+            const interval = setInterval(() => {
+                if (!isEvaluated) fetchData();
+                else clearInterval(interval);
+            }, 2000);
 
-    // Initialize Chart.js
-    function initChart() {
-      const ctx = document.getElementById("voteChart");
-      if (ctx) {
-        chartInstance = new Chart(ctx, {
-          type: "bar",
-          data: chartData,
-          plugins: [dataLabelsPlugin],
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true,
-                labels: {
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 14,
-                    weight: "600",
-                  },
-                  color: "#1a1a1a",
-                  padding: 20,
-                },
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                max: 30,
-                ticks: {
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 12,
-                  },
-                  color: "#666666",
-                },
-                grid: {
-                  color: "rgba(0, 0, 0, 0.05)",
-                  drawBorder: false,
-                },
-              },
-              x: {
-                ticks: {
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 12,
-                  },
-                  color: "#666666",
-                },
-                grid: {
-                  display: false,
-                  drawBorder: false,
-                },
-              },
-            },
-          },
-        });
-      }
-    }
-
-    // Handle evaluate button click
-    function evaluateVotes() {
-      if (!chartInstance) return;
-
-      isEvaluated = true;
-
-      // Set all data to 30
-      chartInstance.data.datasets[0].data = [30, 30, 30, 30, 30];
-
-      // Hide y-axis labels and grid
-      chartInstance.options.scales.y.ticks.display = false;
-      chartInstance.options.scales.y.grid.display = false;
-
-      chartInstance.update();
-      const btn = document.querySelector(".evaluate-btn");
-      if (btn) {
-        btn.removeEventListener("click", evaluateVotes);
-        btn.addEventListener("click", redirectAfterVotes);
-      }
-    }
-
-    function redirectAfterVotes() {
-    // This is the NEW action: Redirection
-    console.log("Redirecting now...");
-    window.location.href = "lottery";
-    }
-    // Attach event listener to button
-    function setupButtonListener() {
-      const btn = document.querySelector(".evaluate-btn");
-      if (btn) {
-        btn.addEventListener("click", evaluateVotes);
-      }
-    }
-
-    // Initialize chart when DOM is ready
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => {
-        initChart();
-        setupButtonListener();
-      });
-    } else {
-      initChart();
-      setupButtonListener();
-    }
-  </script>
+            const btn = document.getElementById("evaluate-btn");
+            if (btn) btn.addEventListener("click", evaluateVotes);
+        }
+    </script>
 </Layout>
 
 <style>
-  main {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100%;
-    background-color: #ffffff;
-  }
+    main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+        background-color: #ffffff;
+    }
 
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem 4rem;
-    border-bottom: 1px solid #e5e5e5;
-  }
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 4rem;
+        border-bottom: 1px solid #e5e5e5;
+    }
 
-  .chart-title {
-    font-family: "Inter", sans-serif;
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
+    .chart-title {
+        font-family: "Inter", sans-serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
 
-  .chart-stats {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    color: #666666;
-    flex: 1;
-    text-align: center;
-  }
+    .chart-stats {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        color: #666666;
+        flex: 1;
+        text-align: center;
+    }
 
-  .stat-value {
-    font-weight: 600;
-    color: #1a1a1a;
-  }
+    .stat-value {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
 
-  .evaluate-btn {
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: #D4AF37;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem 2rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+    .evaluate-btn {
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: #d4af37;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
 
-  .evaluate-btn:hover {
-    background-color: #f5cb40;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
-  }
+    .evaluate-btn:hover {
+        background-color: #f5cb40;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(234, 221, 102, 0.3);
+    }
 
-  .evaluate-btn:active {
-    transform: translateY(0);
-  }
+    .evaluate-btn:active {
+        transform: translateY(0);
+    }
 
-  .chart-wrapper {
-    flex: 1;
-    padding: 2rem 4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 500px;
-    width: 100%;
-  }
+    .chart-wrapper {
+        flex: 1;
+        padding: 2rem 4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 500px;
+        width: 100%;
+    }
 
-  canvas {
-    max-width: 100%;
-    height: 100%;
-  }
+    canvas {
+        max-width: 100%;
+        height: 100%;
+    }
 </style>
