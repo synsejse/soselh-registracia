@@ -25,13 +25,52 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
 
       <div class="right-section">
         <span class="vote-count">Počet hlasujúcich: {voterCount}</span>
-        <button onclick="document.location='chart'" class="start-btn">
+        <button class="start-btn">
           <span>Začať</span>
         </button>
       </div>
     </div>
   </main>
-</Layout>
+
+  <script>
+    async function startVoting() {
+      try {
+        const response = await fetch("/api/voting/status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "start",
+            ready: true,
+          }),
+        });
+
+        if (response.ok) {
+          // Redirect to chart after successful API call
+          window.location.href = "/presenter/chart";
+        } else {
+          console.error("Failed to start voting:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error starting voting:", error);
+      }
+    }
+
+    function setupStartButton() {
+      const btn = document.querySelector(".start-btn");
+      if (btn) {
+        btn.addEventListener("click", startVoting);
+      }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupStartButton);
+    } else {
+      setupStartButton();
+    }
+  </script>
 
 <style>
   main {

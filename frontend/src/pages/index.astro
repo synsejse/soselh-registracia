@@ -8,6 +8,33 @@ import Layout from "../layouts/Layout.astro";
     <div class="divider"></div>
     <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
   </main>
+
+  <script>
+    async function checkVotingReady() {
+      try {
+        // Replace with your actual endpoint
+        const response = await fetch("/api/voting/status");
+        const data = await response.json();
+
+        if (data.ready === true) {
+          window.location.href = "/enter";
+        }
+      } catch (error) {
+        console.error("Error checking voting status:", error);
+      }
+    }
+
+    // Check every 2 seconds if voting is ready
+    const checkInterval = setInterval(checkVotingReady, 2000);
+
+    // Optional: Stop checking after 5 minutes to avoid infinite requests
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 5 * 60 * 1000);
+
+    // Initial check
+    checkVotingReady();
+  </script>
 </Layout>
 
 <style>
