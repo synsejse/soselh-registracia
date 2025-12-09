@@ -1,0 +1,247 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const voted = 20;
+const waiting = 78;
+---
+
+<Layout title="Hlasovanie 4.B - Grafika">
+  <main class="chart-container">
+    <header class="chart-header">
+      <span class="chart-title">Hlasovanie 4.B</span>
+      <span class="chart-stats">Počet hlasov: <span class="stat-value">{voted}</span> | Nehlasovalo: <span class="stat-value">{waiting}</span></span>
+      <button class="evaluate-btn">Vyhodnotiť</button>
+    </header>
+    <div class="chart-wrapper">
+      <canvas id="voteChart"></canvas>
+    </div>
+  </main>
+
+  <script>
+    import Chart from "chart.js/auto";
+
+    let chartInstance = null;
+    let isEvaluated = false;
+
+    // Data that will be updated from database
+    const chartData = {
+      labels: ["Vstup 1", "Vstup 2", "Vstup 3", "Vstup 4", "Vstup 5"],
+      datasets: [
+        {
+          label: "Počet hlasov",
+          data: [20, 19, 8, 15, 10],
+          backgroundColor: "#667eea",
+          borderColor: "#667eea",
+          borderWidth: 1,
+          borderRadius: 6,
+        },
+      ],
+    };
+
+    // Plugin to display values on bars
+    const dataLabelsPlugin = {
+      afterDatasetsDraw(chart) {
+        if (isEvaluated) return; // Skip drawing labels if evaluated
+
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          const meta = chart.getDatasetMeta(datasetIndex);
+          if (!meta.hidden) {
+            meta.data.forEach((element, index) => {
+              const ctx = chart.ctx;
+              const value = dataset.data[index];
+
+              ctx.fillStyle = "#1a1a1a";
+              ctx.font = 'bold 14px "Inter", sans-serif';
+              ctx.textAlign = "center";
+              ctx.textBaseline = "bottom";
+
+              const padding = 5;
+              ctx.fillText(value, element.x, element.y - padding);
+            });
+          }
+        });
+      },
+    };
+
+    // Initialize Chart.js
+    function initChart() {
+      const ctx = document.getElementById("voteChart");
+      if (ctx) {
+        chartInstance = new Chart(ctx, {
+          type: "bar",
+          data: chartData,
+          plugins: [dataLabelsPlugin],
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                labels: {
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 14,
+                    weight: "600",
+                  },
+                  color: "#1a1a1a",
+                  padding: 20,
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 30,
+                ticks: {
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 12,
+                  },
+                  color: "#666666",
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                  drawBorder: false,
+                },
+              },
+              x: {
+                ticks: {
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 12,
+                  },
+                  color: "#666666",
+                },
+                grid: {
+                  display: false,
+                  drawBorder: false,
+                },
+              },
+            },
+          },
+        });
+      }
+    }
+
+    // Handle evaluate button click
+    function evaluateVotes() {
+      if (!chartInstance) return;
+
+      isEvaluated = true;
+
+      // Set all data to 30
+      chartInstance.data.datasets[0].data = [30, 30, 30, 30, 30];
+
+      // Hide y-axis labels and grid
+      chartInstance.options.scales.y.ticks.display = false;
+      chartInstance.options.scales.y.grid.display = false;
+
+      chartInstance.update();
+      const btn = document.querySelector(".evaluate-btn");
+      if (btn) {
+        btn.removeEventListener("click", evaluateVotes);
+        btn.addEventListener("click", redirectAfterVotes);
+      }
+    }
+
+    function redirectAfterVotes() {
+    // This is the NEW action: Redirection
+    console.log("Redirecting now...");
+    window.location.href = "lottery";
+    }
+    // Attach event listener to button
+    function setupButtonListener() {
+      const btn = document.querySelector(".evaluate-btn");
+      if (btn) {
+        btn.addEventListener("click", evaluateVotes);
+      }
+    }
+
+    // Initialize chart when DOM is ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        initChart();
+        setupButtonListener();
+      });
+    } else {
+      initChart();
+      setupButtonListener();
+    }
+  </script>
+</Layout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    background-color: #ffffff;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 4rem;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .chart-title {
+    font-family: "Inter", sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .chart-stats {
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    flex: 1;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .evaluate-btn {
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #667eea;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .evaluate-btn:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .evaluate-btn:active {
+    transform: translateY(0);
+  }
+
+  .chart-wrapper {
+    flex: 1;
+    padding: 2rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    width: 100%;
+  }
+
+  canvas {
+    max-width: 100%;
+    height: 100%;
+  }
+</style>
