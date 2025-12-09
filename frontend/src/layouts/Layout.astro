@@ -10,9 +10,13 @@ const { title } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
+    <meta name="description" content="Hlasovanie" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Inter&display=swap"
+      rel="stylesheet"
+    />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
@@ -29,9 +33,9 @@ const { title } = Astro.props;
   }
 
   html {
-    font-family: system-ui, sans-serif;
-    background: #f6f6f6;
-    color: #444444;
+    font-family: "Inter", system-ui, sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
   }
 
   body {

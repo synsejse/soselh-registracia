@@ -1,0 +1,128 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Hlasovanie 4.B">
+  <main class="voting-container">
+    <span class="voting-title">Hlasovanie 4.B</span>
+    <div class="divider"></div>
+    <span class="main-text">Ktoré vystúpenie sa Vám najviac páčilo?</span>
+    
+    <div class="options-container">
+      <label class="radio-option">
+        <input type="radio" name="performance" value="1" />
+        <span>Výstup 1</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="performance" value="2" />
+        <span>Výstup 2</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="performance" value="3" />
+        <span>Výstup 3</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="performance" value="4" />
+        <span>Výstup 4</span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="performance" value="5" />
+        <span>Výstup 5</span>
+      </label>
+    </div>
+
+    <button class="submit-btn">Hlasovať</button>
+    
+    <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
+  </main>
+</Layout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    gap: 1.5rem;
+  }
+
+  .voting-footer {
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    color: #666666;
+    margin-top: 2rem;
+  }
+
+  .main-text {
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    color: #111111;
+    margin-top: 2rem;
+  }
+
+  .voting-title {
+    font-family: "Inter", sans-serif;
+    font-size: 40px;
+    font-weight: 200;
+    text-align: center;
+    color: #1a1a1a;
+  }
+
+  .divider {
+    width: 60px;
+    height: 4px;
+    background-color: #667eea;
+    border-radius: 2px;
+  }
+
+  .options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    color: #1a1a1a;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .radio-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+  }
+
+  .submit-btn {
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #667eea;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+  }
+
+  .submit-btn:hover {
+    background-color: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+</style>
