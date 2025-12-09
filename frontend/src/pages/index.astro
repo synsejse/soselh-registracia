@@ -1,14 +1,53 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import HeroCarousel from "../components/home/HeroCarousel.astro";
-import IntroSection from "../components/home/IntroSection.astro";
-import OfferSection from "../components/shared/OfferSection.astro";
-import StatsSection from "../components/home/StatsSection.astro";
 ---
 
-<Layout title="Úvod">
-    <HeroCarousel/>
-    <IntroSection/>
-    <OfferSection/>
-    <StatsSection/>
+<Layout title="Welcome to Astro">
+  <main>
+    <div class="container">
+      <h1>Welcome to <span class="text-gradient">Astro</span></h1>
+      <p class="subtitle">Get started by editing the content in <code>src/pages/index.astro</code></p>
+    </div>
+  </main>
 </Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 1.5rem;
+    max-width: 60ch;
+  }
+
+  .container {
+    text-align: center;
+    margin-top: 4rem;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: #888;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+
+  code {
+    background-color: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: "Courier New", monospace;
+  }
+</style>
