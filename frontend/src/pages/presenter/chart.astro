@@ -43,6 +43,8 @@ import Layout from "../../layouts/Layout.astro";
         const dataLabelsPlugin = {
             id: "dataLabels",
             afterDatasetsDraw(chart: Chart) {
+                if (isEvaluated) return;
+
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
                     const meta = chart.getDatasetMeta(datasetIndex);
                     if (!meta.hidden) {
