@@ -1,18 +1,21 @@
 use diesel::result::Error;
 use rand::distributions::Alphanumeric;
 use rand::{Rng, thread_rng};
+use rocket::State;
 use rocket::http::{Cookie, CookieJar, SameSite, Status};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use rocket_db_pools::diesel::prelude::*;
+use std::sync::atomic::AtomicBool;
 use uuid::Uuid;
 
+use crate::AppState;
 use crate::db::VotingDB;
 use crate::models::{
     Candidate, CastVoteRequest, CreateSessionRequest, NewVote, NewVotingSession,
     SessionInfoResponse, VotingSession, VotingStatusResponse,
 };
-use crate::schema::{candidates, settings, votes, voting_sessions};
+use crate::schema::{candidates, votes, voting_sessions};
 
 fn generate_voter_id() -> String {
     thread_rng()
@@ -103,18 +106,11 @@ pub async fn get_candidates(mut db: Connection<VotingDB>) -> Result<Json<Vec<Can
 pub async fn cast_vote(
     mut db: Connection<VotingDB>,
     cookies: &CookieJar<'_>,
+    state: &State<AppState>,
     vote_request: Json<CastVoteRequest>,
 ) -> Result<Status, Status> {
     // Check if voting is enabled
-    let voting_enabled: bool = settings::table
-        .find("voting_enabled")
-        .select(settings::value)
-        .first::<String>(&mut db)
-        .await
-        .map(|v| v == "true")
-        .unwrap_or(false);
-
-    if !voting_enabled {
+    if !AtomicBool::load(&state.voting_enabled, std::sync::atomic::Ordering::Relaxed) {
         return Err(Status::PreconditionFailed); // Voting not started
     }
 
@@ -150,14 +146,10 @@ pub async fn cast_vote(
 pub async fn get_vote_status(
     mut db: Connection<VotingDB>,
     cookies: &CookieJar<'_>,
+    state: &State<AppState>,
 ) -> Result<Json<VotingStatusResponse>, Status> {
-    let voting_enabled: bool = settings::table
-        .find("voting_enabled")
-        .select(settings::value)
-        .first::<String>(&mut db)
-        .await
-        .map(|v| v == "true")
-        .unwrap_or(false);
+    let voting_enabled =
+        AtomicBool::load(&state.voting_enabled, std::sync::atomic::Ordering::Relaxed);
 
     let mut has_voted = false;
 

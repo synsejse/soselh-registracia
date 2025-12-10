@@ -1,9 +1,11 @@
 use rand::{Rng, thread_rng};
+use rocket::State;
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use rocket_db_pools::diesel::prelude::*;
 
+use crate::AppState;
 use crate::db::VotingDB;
 use crate::models::{
     Candidate, CandidateResult, LotteryWinner, UpdateVotingStatusRequest, VotingSession,
@@ -14,6 +16,7 @@ use crate::schema::{candidates, settings, voting_sessions};
 #[post("/admin/status", format = "json", data = "<status_request>")]
 pub async fn set_voting_status(
     mut db: Connection<VotingDB>,
+    state: &State<AppState>,
     status_request: Json<UpdateVotingStatusRequest>,
 ) -> Result<Status, Status> {
     // In a real app, add authentication here!
@@ -32,6 +35,11 @@ pub async fn set_voting_status(
             eprintln!("Error updating voting status: {}", e);
             Status::InternalServerError
         })?;
+
+    state.voting_enabled.store(
+        status_request.action == "start",
+        std::sync::atomic::Ordering::Relaxed,
+    );
 
     Ok(Status::Ok)
 }
@@ -54,31 +62,22 @@ pub async fn get_stats(mut db: Connection<VotingDB>) -> Result<Json<i64>, Status
 pub async fn get_results(
     mut db: Connection<VotingDB>,
 ) -> Result<Json<Vec<CandidateResult>>, Status> {
-    let all_candidates = candidates::table
-        .load::<Candidate>(&mut db)
+    use crate::schema::{candidates, votes};
+    use diesel::dsl::count;
+
+    let results = candidates::table
+        .left_join(votes::table)
+        .group_by(candidates::id)
+        .select((candidates::name, count(votes::id.nullable())))
+        .load::<(String, i64)>(&mut db)
         .await
         .map_err(|e| {
-            eprintln!("Error loading candidates: {}", e);
+            eprintln!("Error loading results: {}", e);
             Status::InternalServerError
-        })?;
-
-    let mut results = Vec::new();
-
-    for candidate in all_candidates {
-        use crate::schema::votes::dsl::{candidate_id, votes};
-
-        let count: i64 = votes
-            .filter(candidate_id.eq(candidate.id))
-            .count()
-            .get_result(&mut db)
-            .await
-            .unwrap_or(0);
-
-        results.push(CandidateResult {
-            name: candidate.name,
-            votes: count,
-        });
-    }
+        })?
+        .into_iter()
+        .map(|(name, votes)| CandidateResult { name, votes })
+        .collect();
 
     Ok(Json(results))
 }

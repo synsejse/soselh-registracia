@@ -8,12 +8,43 @@ mod models;
 mod routes;
 mod schema;
 
+use diesel::prelude::*;
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 use rocket_db_pools::Database;
+use std::sync::atomic::AtomicBool;
 
 use db::VotingDB;
 use routes::voting;
+
+pub struct AppState {
+    pub voting_enabled: AtomicBool,
+}
+
+async fn load_initial_state(
+    rocket: rocket::Rocket<rocket::Build>,
+) -> rocket::Rocket<rocket::Build> {
+    let enabled = rocket::tokio::task::spawn_blocking(|| {
+        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let mut conn = diesel::MysqlConnection::establish(&database_url)
+            .expect("Failed to connect to DB for state loading");
+
+        use schema::settings::dsl::*;
+
+        settings
+            .find("voting_enabled")
+            .select(value)
+            .first::<String>(&mut conn)
+            .map(|v| v == "true")
+            .unwrap_or(false)
+    })
+    .await
+    .expect("State loading task failed");
+
+    rocket.manage(AppState {
+        voting_enabled: AtomicBool::new(enabled),
+    })
+}
 
 #[rocket::launch]
 fn rocket() -> _ {
@@ -38,6 +69,7 @@ fn rocket() -> _ {
         .attach(VotingDB::init())
         .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
         .attach(AdHoc::on_ignite("Database Seeding", db::run_seeding))
+        .attach(AdHoc::on_ignite("Load Initial State", load_initial_state))
         .mount(
             "/api",
             routes![
