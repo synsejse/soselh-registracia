@@ -24,7 +24,10 @@ export interface LotteryWinner {
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
     super(message);
   }
 }
@@ -40,9 +43,22 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export const api = {
-  async getStatus(): Promise<VotingStatus> {
-    const res = await fetch("/api/status");
-    return handleResponse<VotingStatus>(res);
+  subscribeToStatus(callback: (status: VotingStatus) => void): WebSocket {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(
+      `${protocol}//${window.location.host}/api/status/ws`,
+    );
+
+    ws.onmessage = (event) => {
+      try {
+        const status = JSON.parse(event.data);
+        callback(status);
+      } catch (e) {
+        console.error("Failed to parse WS message", e);
+      }
+    };
+
+    return ws;
   },
 
   async createSession(name: string): Promise<SessionInfo> {
@@ -96,6 +112,6 @@ export const api = {
     async pickWinner(): Promise<LotteryWinner> {
       const res = await fetch("/api/admin/lottery");
       return handleResponse<LotteryWinner>(res);
-    }
-  }
+    },
+  },
 };

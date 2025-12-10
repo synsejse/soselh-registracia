@@ -27,22 +27,6 @@ import Layout from "../layouts/Layout.astro";
             "name-input",
         ) as HTMLInputElement;
 
-        async function checkStatus() {
-            try {
-                const status = await api.getStatus();
-                if (!status.ready) {
-                    window.location.href = "/";
-                    return;
-                }
-                if (status.has_voted) {
-                    window.location.href = "/vote-complete";
-                    return;
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
         async function handleLogin() {
             const name = nameInput.value.trim();
 
@@ -74,8 +58,18 @@ import Layout from "../layouts/Layout.astro";
             });
         }
 
-        // Check status on load
-        checkStatus();
+        // Listen for voting stop
+        api.subscribeToStatus((status) => {
+            if (!status.ready) {
+                alert("Hlasovanie bolo ukončené.");
+                window.location.href = "/";
+                return;
+            }
+
+            if (status.has_voted) {
+                window.location.href = "/vote-complete";
+            }
+        });
     </script>
 </Layout>
 

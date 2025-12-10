@@ -101,31 +101,25 @@ import Layout from "../layouts/Layout.astro";
             }
         }
 
-        // Check if user already voted or if voting is disabled
-        async function checkVoteStatus() {
-            try {
-                const status = await api.getStatus();
-
-                if (!status.ready) {
-                    window.location.href = "/";
-                    return;
-                }
-
-                if (status.has_voted) {
-                    window.location.href = "/vote-complete";
-                }
-            } catch (e) {
-                console.error("Failed to check vote status", e);
-            }
-        }
-
         if (submitBtn) {
             submitBtn.addEventListener("click", submitVote);
         }
 
         // Initialize
-        checkVoteStatus();
         loadCandidates();
+
+        // Listen for voting stop
+        api.subscribeToStatus((status) => {
+            if (!status.ready) {
+                alert("Hlasovanie bolo ukončené.");
+                window.location.href = "/";
+                return;
+            }
+
+            if (status.has_voted) {
+                window.location.href = "/vote-complete";
+            }
+        });
     </script>
 </Layout>
 

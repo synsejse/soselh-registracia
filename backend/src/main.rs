@@ -13,12 +13,14 @@ use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 use rocket_db_pools::Database;
 use std::sync::atomic::AtomicBool;
+use tokio::sync::broadcast;
 
 use db::VotingDB;
 use routes::voting;
 
 pub struct AppState {
     pub voting_enabled: AtomicBool,
+    pub tx: broadcast::Sender<bool>,
 }
 
 async fn load_initial_state(
@@ -41,8 +43,11 @@ async fn load_initial_state(
     .await
     .expect("State loading task failed");
 
+    let (tx, _) = broadcast::channel(100);
+
     rocket.manage(AppState {
         voting_enabled: AtomicBool::new(enabled),
+        tx,
     })
 }
 
@@ -77,7 +82,7 @@ fn rocket() -> _ {
                 voting::client::get_session_info,
                 voting::client::get_candidates,
                 voting::client::cast_vote,
-                voting::client::get_vote_status,
+                voting::client::voting_status_ws,
                 voting::admin::set_voting_status,
                 voting::admin::get_stats,
                 voting::admin::get_results,

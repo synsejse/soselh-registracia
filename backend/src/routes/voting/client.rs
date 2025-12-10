@@ -2,10 +2,12 @@ use diesel::result::Error;
 use rand::distributions::Alphanumeric;
 use rand::{Rng, thread_rng};
 use rocket::State;
+use rocket::futures::SinkExt;
 use rocket::http::{Cookie, CookieJar, SameSite, Status};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use rocket_db_pools::diesel::prelude::*;
+use rocket_ws::{Channel, Message, WebSocket};
 use std::sync::atomic::AtomicBool;
 use uuid::Uuid;
 
@@ -13,7 +15,7 @@ use crate::AppState;
 use crate::db::VotingDB;
 use crate::models::{
     Candidate, CastVoteRequest, CreateSessionRequest, NewVote, NewVotingSession,
-    SessionInfoResponse, VotingSession, VotingStatusResponse,
+    SessionInfoResponse, VotingSession,
 };
 use crate::schema::{candidates, votes, voting_sessions};
 
@@ -141,18 +143,19 @@ pub async fn cast_vote(
     }
 }
 
-// Route to check status (voting enabled + user voted)
-#[get("/status")]
-pub async fn get_vote_status(
+// Route for WebSocket status updates
+#[get("/status/ws")]
+pub async fn voting_status_ws<'a>(
+    ws: WebSocket,
+    state: &'a State<AppState>,
+    cookies: &'a CookieJar<'_>,
     mut db: Connection<VotingDB>,
-    cookies: &CookieJar<'_>,
-    state: &State<AppState>,
-) -> Result<Json<VotingStatusResponse>, Status> {
-    let voting_enabled =
+) -> Channel<'a> {
+    let mut rx = state.tx.subscribe();
+    let initial_ready =
         AtomicBool::load(&state.voting_enabled, std::sync::atomic::Ordering::Relaxed);
 
     let mut has_voted = false;
-
     if let Some(token_cookie) = cookies.get("session_token") {
         use crate::schema::votes::dsl::{session_token, votes as votes_table};
 
@@ -166,8 +169,27 @@ pub async fn get_vote_status(
         has_voted = count > 0;
     }
 
-    Ok(Json(VotingStatusResponse {
-        ready: voting_enabled,
-        has_voted,
-    }))
+    ws.channel(move |mut stream| {
+        Box::pin(async move {
+            // Send initial status immediately
+            let initial_msg = rocket::serde::json::serde_json::json!({
+                "ready": initial_ready,
+                "has_voted": has_voted
+            });
+            let _ = stream.send(Message::Text(initial_msg.to_string())).await;
+
+            while let Ok(ready) = rx.recv().await {
+                let msg = rocket::serde::json::serde_json::json!({
+                    "ready": ready,
+                    "has_voted": has_voted
+                });
+
+                if stream.send(Message::Text(msg.to_string())).await.is_err() {
+                    break;
+                }
+            }
+
+            Ok(())
+        })
+    })
 }

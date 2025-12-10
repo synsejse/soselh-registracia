@@ -12,36 +12,17 @@ import Layout from "../layouts/Layout.astro";
     <script>
         import { api } from "../lib/api";
 
-        async function checkVotingReady() {
-            try {
-                const status = await api.getStatus();
-
-                if (status.has_voted) {
-                    window.location.href = "/vote-complete";
-                    return;
-                }
-
-                if (status.ready) {
-                    window.location.href = "/enter";
-                }
-            } catch (error) {
-                console.error("Error checking voting status:", error);
+        // Setup WebSocket for real-time updates
+        api.subscribeToStatus((status) => {
+            if (status.has_voted) {
+                window.location.href = "/vote-complete";
+                return;
             }
-        }
 
-        // Check every 2 seconds if voting is ready
-        const checkInterval = setInterval(checkVotingReady, 2000);
-
-        // Stop checking after 30 minutes
-        setTimeout(
-            () => {
-                clearInterval(checkInterval);
-            },
-            30 * 60 * 1000,
-        );
-
-        // Initial check
-        checkVotingReady();
+            if (status.ready) {
+                window.location.href = "/enter";
+            }
+        });
     </script>
 </Layout>
 

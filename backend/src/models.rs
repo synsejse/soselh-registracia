@@ -95,13 +95,6 @@ pub struct LotteryWinner {
 
 #[derive(Debug, Serialize)]
 #[serde(crate = "rocket::serde")]
-pub struct VotingStatusResponse {
-    pub ready: bool,
-    pub has_voted: bool,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(crate = "rocket::serde")]
 pub struct SessionInfoResponse {
     pub voter_id: String,
     pub name: String,

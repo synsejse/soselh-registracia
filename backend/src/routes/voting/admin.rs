@@ -41,6 +41,8 @@ pub async fn set_voting_status(
         std::sync::atomic::Ordering::Relaxed,
     );
 
+    let _ = state.tx.send(status_request.action == "start");
+
     Ok(Status::Ok)
 }
 
