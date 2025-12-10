@@ -36,6 +36,7 @@ pub struct NewCandidate {
     pub name: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
 #[diesel(table_name = votes)]
 pub struct Vote {
@@ -52,6 +53,7 @@ pub struct NewVote {
     pub candidate_id: i32,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
 #[diesel(table_name = settings)]
 pub struct Setting {
