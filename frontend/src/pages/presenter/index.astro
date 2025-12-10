@@ -23,21 +23,77 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             <div class="divider-vertical"></div>
 
             <div class="right-section">
-                <span class="vote-count"
-                    >Počet hlasov: <span id="voter-count">0</span></span
+                <!-- Login UI shown when not authenticated -->
+                <div id="presenter-login" class="presenter-login">
+                    <input
+                        id="presenter-password"
+                        type="password"
+                        placeholder="Heslo prezentéra"
+                        class="password-input"
+                    />
+                    <button id="presenter-login-btn" class="start-btn">
+                        Prihlásiť
+                    </button>
+                </div>
+
+                <!-- Controls shown only when authenticated -->
+                <div
+                    id="presenter-controls"
+                    class="presenter-controls"
+                    style="display: none;"
                 >
-                <button id="start-btn" class="start-btn">
-                    <span>Začať hlasovanie</span>
-                </button>
-                <a href="/presenter/chart" class="chart-link"
-                    >Zobraziť výsledky</a
-                >
+                    <span class="vote-count"
+                        >Počet hlasov: <span id="voter-count">0</span></span
+                    >
+                    <button id="start-btn" class="start-btn">
+                        <span>Začať hlasovanie</span>
+                    </button>
+                    <a href="/presenter/chart" class="chart-link"
+                        >Zobraziť výsledky</a
+                    >
+                    <button id="presenter-logout-btn" class="logout-btn"
+                        >Odhlásiť</button
+                    >
+                </div>
             </div>
         </div>
     </main>
 
     <script>
         import { api } from "../../lib/api";
+
+        // Presenter auth helper functions (uses backend endpoints)
+        async function isAuthenticated(): Promise<boolean> {
+            try {
+                const res = await fetch("/api/presenter/check");
+                if (!res.ok) return false;
+                const ok = await res.json();
+                return !!ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function presenterLogin(password: string): Promise<boolean> {
+            try {
+                const res = await fetch("/api/presenter/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password }),
+                });
+                return res.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function presenterLogout(): Promise<void> {
+            try {
+                await fetch("/api/presenter/logout", { method: "POST" });
+            } catch (e) {
+                // ignore
+            }
+        }
 
         async function startVoting() {
             const btn = document.getElementById(
@@ -78,26 +134,104 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             if (!btn) return;
 
             try {
-                const status = await api.getStatus();
-                if (status.ready) {
+                const isReady = await api.admin.getStatus();
+                if (isReady) {
                     btn.textContent = "Hlasovanie spustené";
                     btn.classList.add("active");
                     btn.disabled = true;
+                } else {
+                    btn.textContent = "Začať hlasovanie";
+                    btn.classList.remove("active");
+                    btn.disabled = false;
                 }
             } catch (e) {
                 console.error("Error checking status", e);
             }
         }
 
-        // Initialize
-        const btn = document.getElementById("start-btn");
-        if (btn) {
-            btn.addEventListener("click", startVoting);
+        let pollInterval: number | null = null;
+
+        function startPolling() {
+            if (pollInterval) return;
+            checkStatus();
+            updateStats();
+            pollInterval = setInterval(updateStats, 2000) as unknown as number;
         }
 
-        checkStatus();
-        updateStats();
-        setInterval(updateStats, 2000);
+        function stopPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        // Handle presenter UI visibility and auth
+        async function initPresenterAuth() {
+            const loginContainer = document.getElementById("presenter-login")!;
+            const controlsContainer =
+                document.getElementById("presenter-controls")!;
+            const loginBtn = document.getElementById(
+                "presenter-login-btn",
+            ) as HTMLButtonElement | null;
+            const logoutBtn = document.getElementById(
+                "presenter-logout-btn",
+            ) as HTMLButtonElement | null;
+            const passwordInput = document.getElementById(
+                "presenter-password",
+            ) as HTMLInputElement | null;
+
+            const updateUi = (authed: boolean) => {
+                if (authed) {
+                    loginContainer.style.display = "none";
+                    controlsContainer.style.display = "flex";
+                    startPolling();
+                } else {
+                    loginContainer.style.display = "flex";
+                    controlsContainer.style.display = "none";
+                    stopPolling();
+                }
+            };
+
+            const authed = await isAuthenticated();
+            updateUi(authed);
+
+            if (loginBtn && passwordInput) {
+                loginBtn.addEventListener("click", async () => {
+                    loginBtn.disabled = true;
+                    const ok = await presenterLogin(passwordInput.value);
+                    loginBtn.disabled = false;
+                    if (ok) {
+                        updateUi(true);
+                        attachControls();
+                    } else {
+                        alert("Nesprávne heslo");
+                    }
+                });
+            }
+
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async () => {
+                    await presenterLogout();
+                    updateUi(false);
+                });
+            }
+
+            if (authed) {
+                attachControls();
+            }
+        }
+
+        // Attach control events (only call after authenticated)
+        function attachControls() {
+            const btn = document.getElementById("start-btn");
+            if (btn) {
+                btn.removeEventListener("click", startVoting);
+                btn.addEventListener("click", startVoting);
+            }
+        }
+
+        // Initialize
+        initPresenterAuth();
     </script>
 
     <style>
@@ -238,6 +372,53 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             color: #666;
             text-decoration: underline;
             cursor: pointer;
+        }
+
+        .presenter-login {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .presenter-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-family: "Inter", sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .password-input:focus {
+            border-color: #d4af37;
+        }
+
+        .logout-btn {
+            font-family: "Inter", sans-serif;
+            font-size: 1rem;
+            color: #666;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            color: #1a1a1a;
         }
     </style>
 </Layout>

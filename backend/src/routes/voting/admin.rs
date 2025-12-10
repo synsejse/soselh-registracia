@@ -1,23 +1,129 @@
+use bcrypt::verify;
 use rand::{Rng, thread_rng};
 use rocket::State;
-use rocket::http::Status;
+use rocket::http::{Cookie, CookieJar, SameSite, Status};
 use rocket::serde::json::Json;
 use rocket_db_pools::Connection;
 use rocket_db_pools::diesel::prelude::*;
+use uuid::Uuid;
 
 use crate::AppState;
 use crate::db::VotingDB;
-use crate::models::{CandidateResult, LotteryWinner, UpdateVotingStatusRequest, VotingSession};
-use crate::schema::{settings, voting_sessions};
+use crate::models::{
+    CandidateResult, LotteryWinner, NewPresenterSession, UpdateVotingStatusRequest, VotingSession,
+};
+use crate::schema::{presenter_sessions, settings, voting_sessions};
 
-// Admin route to control voting
+#[derive(Debug, serde::Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PresenterLoginRequest {
+    pub password: String,
+}
+
+async fn is_presenter_authenticated(
+    cookies: &CookieJar<'_>,
+    db: &mut Connection<VotingDB>,
+) -> bool {
+    if let Some(cookie) = cookies.get("presenter_auth") {
+        let token = cookie.value();
+        presenter_sessions::table
+            .find(token)
+            .count()
+            .get_result::<i64>(db)
+            .await
+            .unwrap_or(0)
+            > 0
+    } else {
+        false
+    }
+}
+
+#[post("/presenter/login", format = "json", data = "<login>")]
+pub async fn presenter_login(
+    mut db: Connection<VotingDB>,
+    state: &State<AppState>,
+    cookies: &CookieJar<'_>,
+    login: Json<PresenterLoginRequest>,
+) -> Result<Status, Status> {
+    if verify(&login.password, &state.presenter_password_hash).unwrap_or(false) {
+        let token = Uuid::new_v4().to_string();
+        let new_session = NewPresenterSession {
+            session_token: token.clone(),
+            expires_at: None,
+        };
+
+        diesel::insert_into(presenter_sessions::table)
+            .values(&new_session)
+            .execute(&mut db)
+            .await
+            .map_err(|e| {
+                eprintln!("Error creating session: {}", e);
+                Status::InternalServerError
+            })?;
+
+        let mut cookie = Cookie::new("presenter_auth", token);
+        cookie.set_http_only(true);
+        cookie.set_same_site(SameSite::Lax);
+        cookie.set_path("/");
+        cookies.add(cookie);
+        Ok(Status::Ok)
+    } else {
+        Err(Status::Unauthorized)
+    }
+}
+
+#[post("/presenter/logout")]
+pub async fn presenter_logout(
+    mut db: Connection<VotingDB>,
+    cookies: &CookieJar<'_>,
+) -> Result<Status, Status> {
+    if let Some(cookie) = cookies.get("presenter_auth") {
+        let token = cookie.value();
+        diesel::delete(presenter_sessions::table.find(token))
+            .execute(&mut db)
+            .await
+            .ok();
+        cookies.remove(Cookie::from("presenter_auth"));
+    }
+    Ok(Status::Ok)
+}
+
+#[get("/presenter/check")]
+pub async fn presenter_check(
+    mut db: Connection<VotingDB>,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<bool>, Status> {
+    let ok = is_presenter_authenticated(cookies, &mut db).await;
+    Ok(Json(ok))
+}
+
+#[get("/admin/status")]
+pub async fn get_status(
+    mut db: Connection<VotingDB>,
+    state: &State<AppState>,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<bool>, Status> {
+    if !is_presenter_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
+    let enabled = std::sync::atomic::AtomicBool::load(
+        &state.voting_enabled,
+        std::sync::atomic::Ordering::Relaxed,
+    );
+    Ok(Json(enabled))
+}
+
 #[post("/admin/status", format = "json", data = "<status_request>")]
 pub async fn set_voting_status(
     mut db: Connection<VotingDB>,
     state: &State<AppState>,
+    cookies: &CookieJar<'_>,
     status_request: Json<UpdateVotingStatusRequest>,
 ) -> Result<Status, Status> {
-    // In a real app, add authentication here!
+    if !is_presenter_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
 
     let new_value = if status_request.action == "start" {
         "true"
@@ -44,9 +150,15 @@ pub async fn set_voting_status(
     Ok(Status::Ok)
 }
 
-// Admin route to get stats
 #[get("/admin/stats")]
-pub async fn get_stats(mut db: Connection<VotingDB>) -> Result<Json<i64>, Status> {
+pub async fn get_stats(
+    mut db: Connection<VotingDB>,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<i64>, Status> {
+    if !is_presenter_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
     use crate::schema::votes::dsl::votes;
 
     let count: i64 = votes.count().get_result(&mut db).await.map_err(|e| {
@@ -57,11 +169,15 @@ pub async fn get_stats(mut db: Connection<VotingDB>) -> Result<Json<i64>, Status
     Ok(Json(count))
 }
 
-// Route to get voting results
 #[get("/admin/results")]
 pub async fn get_results(
     mut db: Connection<VotingDB>,
+    cookies: &CookieJar<'_>,
 ) -> Result<Json<Vec<CandidateResult>>, Status> {
+    if !is_presenter_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
     use crate::schema::{candidates, votes};
     use diesel::dsl::count;
 
@@ -82,10 +198,15 @@ pub async fn get_results(
     Ok(Json(results))
 }
 
-// Route to pick a lottery winner
 #[get("/admin/lottery")]
-pub async fn pick_winner(mut db: Connection<VotingDB>) -> Result<Json<LotteryWinner>, Status> {
-    // Get all sessions (potential winners)
+pub async fn pick_winner(
+    mut db: Connection<VotingDB>,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<LotteryWinner>, Status> {
+    if !is_presenter_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
     let sessions = voting_sessions::table
         .load::<VotingSession>(&mut db)
         .await

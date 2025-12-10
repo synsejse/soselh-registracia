@@ -21,6 +21,7 @@ use routes::voting;
 pub struct AppState {
     pub voting_enabled: AtomicBool,
     pub tx: broadcast::Sender<bool>,
+    pub presenter_password_hash: String,
 }
 
 async fn load_initial_state(
@@ -45,14 +46,20 @@ async fn load_initial_state(
 
     let (tx, _) = broadcast::channel(100);
 
+    let presenter_password_hash =
+        std::env::var("PRESENTER_PASSWORD_HASH").expect("PRESENTER_PASSWORD_HASH must be set");
+
     rocket.manage(AppState {
         voting_enabled: AtomicBool::new(enabled),
         tx,
+        presenter_password_hash,
     })
 }
 
 #[rocket::launch]
 fn rocket() -> _ {
+    dotenvy::dotenv().ok();
+
     let mut figment = rocket::config::Config::figment();
 
     // Allow setting database URL via environment variable
@@ -83,6 +90,10 @@ fn rocket() -> _ {
                 voting::client::get_candidates,
                 voting::client::cast_vote,
                 voting::client::voting_status_ws,
+                voting::admin::presenter_login,
+                voting::admin::presenter_logout,
+                voting::admin::presenter_check,
+                voting::admin::get_status,
                 voting::admin::set_voting_status,
                 voting::admin::get_stats,
                 voting::admin::get_results,

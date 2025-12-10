@@ -2,7 +2,7 @@ use chrono::NaiveDateTime;
 use rocket::serde::{Deserialize, Serialize};
 use rocket_db_pools::diesel::prelude::*;
 
-use crate::schema::{candidates, settings, votes, voting_sessions};
+use crate::schema::{candidates, presenter_sessions, settings, votes, voting_sessions};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
 #[diesel(table_name = voting_sessions)]
@@ -21,6 +21,21 @@ pub struct NewVotingSession {
     pub display_name: String,
     pub ip_address: Option<String>,
     pub voter_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]
+#[diesel(table_name = presenter_sessions)]
+pub struct PresenterSession {
+    pub session_token: String,
+    pub created_at: Option<NaiveDateTime>,
+    pub expires_at: Option<NaiveDateTime>,
+}
+
+#[derive(Debug, Clone, Insertable)]
+#[diesel(table_name = presenter_sessions)]
+pub struct NewPresenterSession {
+    pub session_token: String,
+    pub expires_at: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable)]

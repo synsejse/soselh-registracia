@@ -9,6 +9,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    presenter_sessions (session_token) {
+        #[max_length = 64]
+        session_token -> Varchar,
+        created_at -> Nullable<Timestamp>,
+        expires_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
     settings (key_name) {
         #[max_length = 50]
         key_name -> Varchar,
@@ -44,4 +53,10 @@ diesel::table! {
 diesel::joinable!(votes -> candidates (candidate_id));
 diesel::joinable!(votes -> voting_sessions (session_token));
 
-diesel::allow_tables_to_appear_in_same_query!(candidates, settings, votes, voting_sessions,);
+diesel::allow_tables_to_appear_in_same_query!(
+    candidates,
+    presenter_sessions,
+    settings,
+    votes,
+    voting_sessions,
+);

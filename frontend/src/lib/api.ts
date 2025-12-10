@@ -113,5 +113,10 @@ export const api = {
       const res = await fetch("/api/admin/lottery");
       return handleResponse<LotteryWinner>(res);
     },
+
+    async getStatus(): Promise<boolean> {
+      const res = await fetch("/api/admin/status");
+      return handleResponse<boolean>(res);
+    },
   },
 };
