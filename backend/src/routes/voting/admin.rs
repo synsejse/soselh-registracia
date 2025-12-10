@@ -7,10 +7,8 @@ use rocket_db_pools::diesel::prelude::*;
 
 use crate::AppState;
 use crate::db::VotingDB;
-use crate::models::{
-    Candidate, CandidateResult, LotteryWinner, UpdateVotingStatusRequest, VotingSession,
-};
-use crate::schema::{candidates, settings, voting_sessions};
+use crate::models::{CandidateResult, LotteryWinner, UpdateVotingStatusRequest, VotingSession};
+use crate::schema::{settings, voting_sessions};
 
 // Admin route to control voting
 #[post("/admin/status", format = "json", data = "<status_request>")]
