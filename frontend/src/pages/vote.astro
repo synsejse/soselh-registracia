@@ -106,7 +106,15 @@ import Layout from "../layouts/Layout.astro";
         }
 
         // Initialize
-        loadCandidates();
+        async function init() {
+            try {
+                await api.getSession();
+                loadCandidates();
+            } catch (e) {
+                window.location.href = "/enter";
+            }
+        }
+        init();
 
         // Listen for voting stop
         api.subscribeToStatus((status) => {

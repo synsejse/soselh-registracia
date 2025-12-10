@@ -21,19 +21,26 @@ import Layout from "../layouts/Layout.astro";
     <script>
         import { api } from "../lib/api";
 
-        async function loadVoterId() {
+        async function init() {
             try {
                 const session = await api.getSession();
                 const voterIdElement = document.getElementById("voter-id");
                 if (voterIdElement) {
                     voterIdElement.textContent = session.voter_id;
                 }
+
+                api.subscribeToStatus((status) => {
+                    if (!status.has_voted) {
+                        window.location.href = "/vote";
+                    }
+                });
             } catch (error) {
-                console.error("Error loading voter ID:", error);
+                console.error("Error loading session:", error);
+                window.location.href = "/enter";
             }
         }
 
-        loadVoterId();
+        init();
     </script>
 </Layout>
 

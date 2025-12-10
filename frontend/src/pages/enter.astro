@@ -27,6 +27,14 @@ import Layout from "../layouts/Layout.astro";
             "name-input",
         ) as HTMLInputElement;
 
+        // Check for existing session
+        try {
+            await api.getSession();
+            window.location.href = "/vote";
+        } catch (e) {
+            // No session, stay on page
+        }
+
         async function handleLogin() {
             const name = nameInput.value.trim();
 
@@ -36,7 +44,7 @@ import Layout from "../layouts/Layout.astro";
             }
 
             try {
-                submitBtn.setAttribute("disabled", "true");
+                if (submitBtn) submitBtn.setAttribute("disabled", "true");
                 await api.createSession(name);
                 window.location.href = "/vote";
             } catch (error) {
@@ -44,7 +52,7 @@ import Layout from "../layouts/Layout.astro";
                 alert(
                     "Nepodarilo sa vytvoriť reláciu. Skúste to prosím znova.",
                 );
-                submitBtn.removeAttribute("disabled");
+                if (submitBtn) submitBtn.removeAttribute("disabled");
             }
         }
 

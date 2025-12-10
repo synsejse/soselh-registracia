@@ -1,4 +1,5 @@
 use bcrypt::verify;
+use chrono::{Duration, Utc};
 use rand::{Rng, thread_rng};
 use rocket::State;
 use rocket::http::{Cookie, CookieJar, SameSite, Status};
@@ -26,13 +27,26 @@ async fn is_presenter_authenticated(
 ) -> bool {
     if let Some(cookie) = cookies.get("presenter_auth") {
         let token = cookie.value();
-        presenter_sessions::table
+        let session = presenter_sessions::table
             .find(token)
-            .count()
-            .get_result::<i64>(db)
-            .await
-            .unwrap_or(0)
-            > 0
+            .first::<crate::models::PresenterSession>(db)
+            .await;
+
+        match session {
+            Ok(s) => {
+                if s.expires_at
+                    .is_some_and(|expires| expires < Utc::now().naive_utc())
+                {
+                    // Session expired, clean it up
+                    let _ = diesel::delete(presenter_sessions::table.find(token))
+                        .execute(db)
+                        .await;
+                    return false;
+                }
+                true
+            }
+            Err(_) => false,
+        }
     } else {
         false
     }
@@ -47,9 +61,12 @@ pub async fn presenter_login(
 ) -> Result<Status, Status> {
     if verify(&login.password, &state.presenter_password_hash).unwrap_or(false) {
         let token = Uuid::new_v4().to_string();
+        // Set session expiry to 24 hours
+        let expires = Utc::now().naive_utc() + Duration::hours(24);
+
         let new_session = NewPresenterSession {
             session_token: token.clone(),
-            expires_at: None,
+            expires_at: Some(expires),
         };
 
         diesel::insert_into(presenter_sessions::table)

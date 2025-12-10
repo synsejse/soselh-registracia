@@ -33,6 +33,7 @@ fn generate_voter_id() -> String {
 pub async fn create_session(
     mut db: Connection<VotingDB>,
     cookies: &CookieJar<'_>,
+    client_ip: std::net::IpAddr,
     session_request: Json<CreateSessionRequest>,
 ) -> Result<Json<SessionInfoResponse>, Status> {
     let token = Uuid::new_v4().to_string();
@@ -41,7 +42,7 @@ pub async fn create_session(
     let new_session = NewVotingSession {
         session_token: token.clone(),
         display_name: session_request.name.clone(),
-        ip_address: None,
+        ip_address: Some(client_ip.to_string()),
         voter_id: voter_id.clone(),
     };
 
