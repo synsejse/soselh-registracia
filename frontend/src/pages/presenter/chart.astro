@@ -2,7 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 ---
 
-<Layout title="Hlasovanie 4.B - Grafika">
+<Layout title="Hlasovanie 4.B">
     <main class="chart-container">
         <header class="chart-header">
             <span class="chart-title">Hlasovanie 4.B</span>
@@ -347,6 +347,8 @@ import Layout from "../../layouts/Layout.astro";
 </Layout>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+
     main {
         display: flex;
         flex-direction: column;
@@ -364,10 +366,11 @@ import Layout from "../../layouts/Layout.astro";
     }
 
     .chart-title {
-        font-family: "Inter", sans-serif;
+        font-family: "Google Sans Flex", sans-serif;
         font-size: 2.5rem;
         font-weight: 600;
         color: #1a1a1a;
+
     }
 
     .chart-right {
@@ -377,7 +380,7 @@ import Layout from "../../layouts/Layout.astro";
     }
 
     .chart-stats {
-        font-family: "Inter", sans-serif;
+        font-family: "Google Sans Flex", sans-serif;
         font-size: 1rem;
         color: #666666;
         flex: 1;
@@ -390,7 +393,7 @@ import Layout from "../../layouts/Layout.astro";
     }
 
     .evaluate-btn {
-        font-family: "Inter", sans-serif;
+        font-family: "Google Sans Flex", sans-serif;
         font-size: 1rem;
         font-weight: 600;
         color: #ffffff;
@@ -444,12 +447,12 @@ import Layout from "../../layouts/Layout.astro";
         padding: 0.4rem;
         border-radius: 6px;
         border: 1px solid #ddd;
-        font-family: "Inter", sans-serif;
+        font-family: "Google Sans Flex", sans-serif;
         font-size: 1rem;
     }
 
     .logout-btn {
-        font-family: "Inter", sans-serif;
+        font-family: "Google Sans Flex", sans-serif;
         font-size: 1rem;
         font-weight: 600;
         color: #666;
