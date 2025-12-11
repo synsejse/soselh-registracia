@@ -82,7 +82,10 @@ pub async fn get_session_info(
         .find(token_val)
         .first::<VotingSession>(&mut db)
         .await
-        .map_err(|_| Status::Unauthorized)?;
+        .map_err(|_| {
+            cookies.remove(Cookie::from("session_token"));
+            Status::Unauthorized
+        })?;
 
     Ok(Json(SessionInfoResponse {
         voter_id: session.voter_id,
