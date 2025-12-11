@@ -101,5 +101,5 @@ fn rocket() -> _ {
             ],
         )
         .mount("/", FileServer::from("/app/static"))
-        .register("/", catchers![routes::not_found])
+        .register("/", catchers![routes::not_found, routes::unauthorized])
 }
