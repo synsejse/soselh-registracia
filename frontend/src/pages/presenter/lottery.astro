@@ -12,18 +12,20 @@ const winnerNumber = "???";
         </header>
 
         <div class="lottery-content">
+            <div id="dividerTop" class="divider" style="display: none;"></div>
             <div
                 id="winnerSection"
                 class="winner-section"
                 style="display: none;"
             >
                 <span class="vote-count"
-                    >Vyhral/a: <span id="winnerName">{winnerName}</span></span
+                    >Vyhral/a: <span class="vote-result" id="winnerName">{winnerName}</span></span
                 >
                 <span class="vote-count"
-                    >ID: <span id="winnerNumber">{winnerNumber}</span></span
+                    >ID: <span class="vote-result" id="winnerNumber">{winnerNumber}</span></span
                 >
             </div>
+            <div id="dividerBottom" class="divider" style="display: none;"></div>
 
             <button id="lotteryBtn" class="lottery-btn">Vyžrebovať</button>
 
@@ -73,6 +75,8 @@ const winnerNumber = "???";
                 "lotteryBtn",
             ) as HTMLButtonElement;
             const winnerSection = document.getElementById("winnerSection");
+            const dividerTop = document.getElementById("dividerTop");
+            const dividerBottom = document.getElementById("dividerBottom");
 
             if (btn) btn.disabled = true;
 
@@ -86,9 +90,11 @@ const winnerNumber = "???";
                 if (nameEl) nameEl.textContent = winner.name;
                 if (numberEl) numberEl.textContent = winner.voter_id;
 
-                // Hide button and show winner section
+                // Hide button and show winner section and dividers
                 if (btn) btn.style.display = "none";
                 if (winnerSection) winnerSection.style.display = "flex";
+                if (dividerTop) dividerTop.style.display = "block";
+                if (dividerBottom) dividerBottom.style.display = "block";
 
                 // Show party emoji
                 if (partyEl) {
@@ -134,6 +140,10 @@ const winnerNumber = "???";
         height: 100vh;
         width: 100%;
         background-color: #ffffff;
+    }
+
+    .vote-result {
+        color: #d4af37;
     }
 
     .presenter-header {
@@ -212,6 +222,13 @@ const winnerNumber = "???";
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+    }
+
+    .divider {
+        width: 60px;
+        height: 4px;
+        background-color: #d4af37;
+        border-radius: 2px;
     }
 
     @keyframes bounce {

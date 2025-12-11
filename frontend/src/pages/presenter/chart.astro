@@ -7,11 +7,11 @@ import Layout from "../../layouts/Layout.astro";
         <header class="chart-header">
             <span class="chart-title">Hlasovanie 4.B</span>
             <div class="chart-right">
-                <span class="chart-stats"
-                    >Počet hlasov: <span id="total-votes" class="stat-value"
-                        >0</span
-                    ></span
-                >
+                <div class="stats">
+                <span class="chart-stats">Nezahlasované: <span id="unvoted" class="stat-value">0</span></span>
+                <span class="chart-stats">|</span>
+                <span class="chart-stats">Zahlasované: <span id="voted" class="stat-value">0</span></span>
+                </div>
                 <!-- Login UI shown when not authenticated -->
                 <div id="presenter-login" class="presenter-login">
                     <input
@@ -174,7 +174,7 @@ import Layout from "../../layouts/Layout.astro";
                     chartInstance.data.datasets[0].data = data;
                     chartInstance.update();
 
-                    const totalEl = document.getElementById("total-votes");
+                    const totalEl = document.getElementById("voted");
                     if (totalEl) totalEl.textContent = totalVotes.toString();
                 }
             } catch (error) {
