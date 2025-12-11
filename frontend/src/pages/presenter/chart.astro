@@ -54,7 +54,7 @@ import Layout from "../../layouts/Layout.astro";
     </main>
 
     <script>
-        import Chart from "chart.js/auto";
+        import { Chart } from "chart.js/auto";
         import { api } from "../../lib/api";
 
         let chartInstance: Chart | null = null;
@@ -81,26 +81,28 @@ import Layout from "../../layouts/Layout.astro";
             afterDatasetsDraw(chart: Chart) {
                 if (isEvaluated) return;
 
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    if (!meta.hidden) {
-                        meta.data.forEach((element, index) => {
-                            const ctx = chart.ctx;
-                            const value = dataset.data[index];
+                chart.data.datasets.forEach(
+                    (dataset: any, datasetIndex: number) => {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                            meta.data.forEach((element: any, index: number) => {
+                                const ctx = chart.ctx;
+                                const value = dataset.data[index];
 
-                            // @ts-ignore
-                            const { x, y } = element;
+                                // @ts-ignore
+                                const { x, y } = element;
 
-                            ctx.fillStyle = "#1a1a1a";
-                            ctx.font = 'bold 14px "Inter", sans-serif';
-                            ctx.textAlign = "center";
-                            ctx.textBaseline = "bottom";
+                                ctx.fillStyle = "#1a1a1a";
+                                ctx.font = 'bold 14px "Inter", sans-serif';
+                                ctx.textAlign = "center";
+                                ctx.textBaseline = "bottom";
 
-                            const padding = 5;
-                            ctx.fillText(value as string, x, y - padding);
-                        });
-                    }
-                });
+                                const padding = 5;
+                                ctx.fillText(value as string, x, y - padding);
+                            });
+                        }
+                    },
+                );
             },
         };
 
@@ -117,6 +119,11 @@ import Layout from "../../layouts/Layout.astro";
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                top: 30,
+                            },
+                        },
                         plugins: {
                             legend: {
                                 display: false,
@@ -135,7 +142,6 @@ import Layout from "../../layouts/Layout.astro";
                                 },
                                 grid: {
                                     color: "rgba(0, 0, 0, 0.05)",
-                                    drawBorder: false,
                                 },
                             },
                             x: {
@@ -148,7 +154,6 @@ import Layout from "../../layouts/Layout.astro";
                                 },
                                 grid: {
                                     display: false,
-                                    drawBorder: false,
                                 },
                             },
                         },
@@ -159,22 +164,25 @@ import Layout from "../../layouts/Layout.astro";
 
         async function fetchData() {
             try {
-                const results = await api.admin.getResults();
+                const [results, stats] = await Promise.all([
+                    api.admin.getResults(),
+                    api.admin.getStats(),
+                ]);
 
                 if (chartInstance) {
                     const labels = results.map((r) => r.name);
                     const data = results.map((r) => r.votes);
-                    const totalVotes = data.reduce(
-                        (a: number, b: number) => a + b,
-                        0,
-                    );
 
                     chartInstance.data.labels = labels;
                     chartInstance.data.datasets[0].data = data;
                     chartInstance.update();
 
                     const totalEl = document.getElementById("voted");
-                    if (totalEl) totalEl.textContent = totalVotes.toString();
+                    if (totalEl) totalEl.textContent = stats.voted.toString();
+
+                    const unvotedEl = document.getElementById("unvoted");
+                    if (unvotedEl)
+                        unvotedEl.textContent = stats.unvoted.toString();
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -346,7 +354,7 @@ import Layout from "../../layouts/Layout.astro";
 </Layout>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+    @import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
 
     main {
         display: flex;
@@ -369,7 +377,6 @@ import Layout from "../../layouts/Layout.astro";
         font-size: 2.5rem;
         font-weight: 600;
         color: #1a1a1a;
-
     }
 
     .chart-right {

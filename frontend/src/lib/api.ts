@@ -23,6 +23,11 @@ export interface LotteryWinner {
   voter_id: string;
 }
 
+export interface AdminStats {
+  voted: number;
+  unvoted: number;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -99,9 +104,9 @@ export const api = {
       return handleResponse<void>(res);
     },
 
-    async getStats(): Promise<number> {
+    async getStats(): Promise<AdminStats> {
       const res = await fetch("/api/admin/stats");
-      return handleResponse<number>(res);
+      return handleResponse<AdminStats>(res);
     },
 
     async getResults(): Promise<CandidateResult[]> {

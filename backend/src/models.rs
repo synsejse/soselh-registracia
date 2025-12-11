@@ -103,6 +103,13 @@ pub struct CandidateResult {
 
 #[derive(Debug, Serialize)]
 #[serde(crate = "rocket::serde")]
+pub struct AdminStats {
+    pub voted: i64,
+    pub unvoted: i64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(crate = "rocket::serde")]
 pub struct LotteryWinner {
     pub name: String,
     pub voter_id: String,

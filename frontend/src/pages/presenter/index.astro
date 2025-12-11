@@ -42,9 +42,6 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
                     class="presenter-controls"
                     style="display: none;"
                 >
-                    <span class="vote-count"
-                        >Počet hlasov: <span id="voter-count">0</span></span
-                    >
                     <button id="start-btn" class="start-btn">
                         <span>Začať hlasovanie</span>
                     </button>
@@ -117,16 +114,6 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             }
         }
 
-        async function updateStats() {
-            try {
-                const count = await api.admin.getStats();
-                const el = document.getElementById("voter-count");
-                if (el) el.textContent = count.toString();
-            } catch (e) {
-                console.error("Error fetching stats", e);
-            }
-        }
-
         async function checkStatus() {
             const btn = document.getElementById(
                 "start-btn",
@@ -149,22 +136,6 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             }
         }
 
-        let pollInterval: number | null = null;
-
-        function startPolling() {
-            if (pollInterval) return;
-            checkStatus();
-            updateStats();
-            pollInterval = setInterval(updateStats, 2000) as unknown as number;
-        }
-
-        function stopPolling() {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-        }
-
         // Handle presenter UI visibility and auth
         async function initPresenterAuth() {
             const loginContainer = document.getElementById("presenter-login")!;
@@ -184,11 +155,10 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
                 if (authed) {
                     loginContainer.style.display = "none";
                     controlsContainer.style.display = "flex";
-                    startPolling();
+                    checkStatus();
                 } else {
                     loginContainer.style.display = "flex";
                     controlsContainer.style.display = "none";
-                    stopPolling();
                 }
             };
 
@@ -235,7 +205,7 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+        @import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
 
         main {
             display: flex;
@@ -323,13 +293,6 @@ const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data
             flex: 1;
             align-items: center;
             justify-content: center;
-        }
-
-        .vote-count {
-            font-family: "Google Sans Flex", sans-serif;
-            font-size: 1.5rem;
-            color: #1a1a1a;
-            font-weight: 600;
         }
 
         .start-btn {

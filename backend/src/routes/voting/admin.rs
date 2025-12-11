@@ -11,7 +11,8 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::db::VotingDB;
 use crate::models::{
-    CandidateResult, LotteryWinner, NewPresenterSession, UpdateVotingStatusRequest, VotingSession,
+    AdminStats, CandidateResult, LotteryWinner, NewPresenterSession, UpdateVotingStatusRequest,
+    VotingSession,
 };
 use crate::schema::{presenter_sessions, settings, voting_sessions};
 
@@ -171,19 +172,37 @@ pub async fn set_voting_status(
 pub async fn get_stats(
     mut db: Connection<VotingDB>,
     cookies: &CookieJar<'_>,
-) -> Result<Json<i64>, Status> {
+) -> Result<Json<AdminStats>, Status> {
     if !is_presenter_authenticated(cookies, &mut db).await {
         return Err(Status::Unauthorized);
     }
 
-    use crate::schema::votes::dsl::votes;
+    use crate::schema::votes;
 
-    let count: i64 = votes.count().get_result(&mut db).await.map_err(|e| {
-        eprintln!("Error getting stats: {}", e);
-        Status::InternalServerError
-    })?;
+    let voted_count: i64 = votes::table
+        .count()
+        .get_result(&mut db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error getting vote stats: {}", e);
+            Status::InternalServerError
+        })?;
 
-    Ok(Json(count))
+    let total_sessions: i64 = voting_sessions::table
+        .count()
+        .get_result(&mut db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error getting session stats: {}", e);
+            Status::InternalServerError
+        })?;
+
+    let unvoted_count = total_sessions - voted_count;
+
+    Ok(Json(AdminStats {
+        voted: voted_count,
+        unvoted: unvoted_count,
+    }))
 }
 
 #[get("/admin/results")]
