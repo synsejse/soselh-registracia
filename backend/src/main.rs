@@ -68,7 +68,7 @@ fn rocket() -> _ {
             "databases.voting_db",
             rocket_db_pools::Config {
                 url: database_url,
-                min_connections: None,
+                min_connections: Some(1),
                 max_connections: 1024,
                 connect_timeout: 3,
                 idle_timeout: None,
