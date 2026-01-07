@@ -1,6 +1,6 @@
 // Routes module - organizes all HTTP route handlers
 
-pub mod voting;
+pub mod registration;
 
 use rocket::fs::NamedFile;
 use rocket::http::Status;

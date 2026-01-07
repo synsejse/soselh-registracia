@@ -1,0 +1,4 @@
+-- Drop tables
+DROP TABLE IF EXISTS registrations;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS settings;

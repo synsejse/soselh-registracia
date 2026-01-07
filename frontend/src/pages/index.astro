@@ -1,62 +1,459 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+import Phone from "../icons/Phone.astro";
+import Envelope from "../icons/Envelope.astro";
+import { Image } from "astro:assets";
+import logoImage from "../assets/soselh-logo.png";
 ---
 
-<Layout title="Hlasovanie">
-    <main class="voting-container">
-        <span class="voting-title">Čaká sa na<br />spustenie hlasovania.</span>
-        <div class="divider"></div>
-        <span class="voting-footer">Tobias Slabej & Kristián Kekeš @ 2025</span>
+<Layout title="Prihlasovanie na odborové dni">
+    <main
+        class="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-300 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-start"
+    >
+        <div class="max-w-5xl w-full">
+            <div class="flex justify-center mb-8">
+                <Image
+                    src={logoImage}
+                    alt="Logo SOŠ Elektrotechnická"
+                    class="h-24 w-auto"
+                />
+            </div>
+            <h1
+                class="text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-10 drop-shadow-sm"
+            >
+                Prihlasovanie na odborové dni
+            </h1>
+
+            <div
+                id="status-message"
+                class="hidden p-5 rounded-xl mb-8 text-center font-bold shadow-sm"
+            >
+            </div>
+
+            <div id="registration-form-container">
+                <form
+                    id="registration-form"
+                    class="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100"
+                >
+                    <div class="mb-10">
+                        <h2
+                            class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-4 border-yellow-500 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-20 after:h-1 after:bg-gradient-to-r after:from-yellow-500 after:to-transparent"
+                        >
+                            Údaje o žiakovi
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label
+                                    for="student_first_name"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Meno žiaka *</label
+                                >
+                                <input
+                                    type="text"
+                                    id="student_first_name"
+                                    name="student_first_name"
+                                    required
+                                    placeholder="Jožko"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    for="student_last_name"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Priezvisko žiaka *</label
+                                >
+                                <input
+                                    type="text"
+                                    id="student_last_name"
+                                    name="student_last_name"
+                                    required
+                                    placeholder="Mrkvička"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <h2
+                            class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-4 border-yellow-500 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-20 after:h-1 after:bg-gradient-to-r after:from-yellow-500 after:to-transparent"
+                        >
+                            Údaje o zákonnom zástupcovi
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label
+                                    for="guardian_first_name"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Meno zákonného zástupcu *</label
+                                >
+                                <input
+                                    type="text"
+                                    id="guardian_first_name"
+                                    name="guardian_first_name"
+                                    required
+                                    placeholder="Jozef"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    for="guardian_last_name"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Priezvisko zákonného zástupcu *</label
+                                >
+                                <input
+                                    type="text"
+                                    id="guardian_last_name"
+                                    name="guardian_last_name"
+                                    required
+                                    placeholder="Mrkvička"
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    for="guardian_phone"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Telefón zákonného zástupcu *</label
+                                >
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                                    >
+                                        <Phone class="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        id="guardian_phone"
+                                        name="guardian_phone"
+                                        required
+                                        pattern="[+]?[0-9\\s]{10,15}"
+                                        placeholder="+421 900 000 000"
+                                        title="Zadajte platné telefónne číslo (napr. +421 900 000 000)"
+                                        class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                    />
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500 pl-1">
+                                    Formát: +421 9XX XXX XXX alebo 09XX XXX XXX
+                                </p>
+                            </div>
+                            <div>
+                                <label
+                                    for="guardian_email"
+                                    class="block font-semibold text-gray-800 mb-2 text-sm md:text-base"
+                                    >Email zákonného zástupcu *</label
+                                >
+                                <div class="relative">
+                                    <div
+                                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                                    >
+                                        <Envelope
+                                            class="h-5 w-5 text-gray-400"
+                                        />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        id="guardian_email"
+                                        name="guardian_email"
+                                        required
+                                        placeholder="priklad@email.com"
+                                        class="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg text-base transition-all duration-300 bg-gray-50 focus:outline-none focus:border-yellow-500 focus:bg-white focus:ring-4 focus:ring-yellow-500/10 hover:border-gray-300"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-10">
+                        <h2
+                            class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-4 border-yellow-500 relative after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-20 after:h-1 after:bg-gradient-to-r after:from-yellow-500 after:to-transparent"
+                        >
+                            Výber termínu a odboru
+                        </h2>
+                        <div id="sessions-container" class="mt-4">
+                            <p class="text-center text-gray-500 p-4">
+                                Načítavam dostupné termíny...
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        id="submit-btn"
+                        class="w-full py-4 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl text-lg font-bold uppercase tracking-wider shadow-lg transition-all duration-300 hover:from-yellow-600 hover:to-yellow-700 hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                        disabled
+                    >
+                        Prihlásiť sa
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-12 text-center text-gray-500 font-medium text-sm">
+                <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
+            </div>
+        </div>
     </main>
 
     <script>
-        import { api } from "../lib/api";
+        import { api, type Session } from "../lib/api";
 
-        // Setup WebSocket for real-time updates
-        api.subscribeToStatus((status) => {
-            if (status.has_voted) {
-                window.location.href = "/vote-complete";
+        let sessions: Session[] = [];
+        let selectedSessionId: number | null = null;
+
+        async function loadSessions() {
+            try {
+                const status = await api.getRegistrationStatus();
+
+                if (!status) {
+                    document.getElementById("sessions-container")!.innerHTML =
+                        '<p class="bg-red-100 text-red-800 border-2 border-red-500 rounded-lg p-4 text-center font-bold">Prihlasovanie nie je momentálne otvorené.</p>';
+                    return;
+                }
+
+                sessions = await api.getSessions();
+                renderSessions();
+            } catch (error) {
+                console.error("Failed to load sessions:", error);
+                document.getElementById("sessions-container")!.innerHTML =
+                    '<p class="bg-red-100 text-red-800 border-2 border-red-500 rounded-lg p-4 text-center font-bold">Nepodarilo sa načítať termíny. Skúste obnoviť stránku.</p>';
+            }
+        }
+
+        function renderSessions() {
+            const container = document.getElementById("sessions-container")!;
+
+            if (sessions.length === 0) {
+                container.innerHTML =
+                    '<p class="bg-blue-100 text-blue-800 border-2 border-blue-500 rounded-lg p-4 text-center font-bold">Momentálne nie sú k dispozícii žiadne termíny.</p>';
                 return;
             }
 
-            if (status.ready) {
-                window.location.href = "/enter";
+            // Group sessions by turnus
+            const turnus1 = sessions.filter((s) => s.turnus === 1);
+            const turnus2 = sessions.filter((s) => s.turnus === 2);
+
+            let html = "";
+
+            if (turnus1.length > 0) {
+                html += '<div class="mb-10">';
+                html +=
+                    '<h3 class="text-xl font-bold text-gray-900 mb-5 p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">1. turnus (26.1.2026 - 30.1.2026)</h3>';
+                html += '<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">';
+                html += renderSessionGroup(turnus1);
+                html += "</div></div>";
             }
+
+            if (turnus2.length > 0) {
+                html += '<div class="mb-10">';
+                html +=
+                    '<h3 class="text-xl font-bold text-gray-900 mb-5 p-3 bg-gray-50 rounded-lg border-l-4 border-yellow-500">2. turnus (3.2.2026 - 9.2.2026)</h3>';
+                html += '<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">';
+                html += renderSessionGroup(turnus2);
+                html += "</div></div>";
+            }
+
+            container.innerHTML = html;
+
+            // Add event listeners to radio buttons
+            document
+                .querySelectorAll('input[name="session"]')
+                .forEach((radio) => {
+                    radio.addEventListener("change", (e) => {
+                        const target = e.target as HTMLInputElement;
+                        selectedSessionId = parseInt(target.value);
+                        document
+                            .getElementById("submit-btn")!
+                            .removeAttribute("disabled");
+                    });
+                });
+        }
+
+        function renderSessionGroup(sessions: Session[]): string {
+            // Sort by date
+            const sorted = [...sessions].sort(
+                (a, b) =>
+                    new Date(a.session_date).getTime() -
+                    new Date(b.session_date).getTime(),
+            );
+
+            return sorted
+                .map((session) => {
+                    const isAvailable = session.available_spots > 0;
+                    const dateObj = new Date(session.session_date);
+                    const dayName = [
+                        "Nedeľa",
+                        "Pondelok",
+                        "Utorok",
+                        "Streda",
+                        "Štvrtok",
+                        "Piatok",
+                        "Sobota",
+                    ][dateObj.getDay()];
+                    const dateFormatted = `${dateObj.getDate()}.${dateObj.getMonth() + 1}.${dateObj.getFullYear()}`;
+                    const fullClass = !isAvailable
+                        ? "opacity-60 bg-gray-50 border-gray-300 cursor-not-allowed"
+                        : "bg-white border-gray-200 hover:border-yellow-500 hover:shadow-md hover:-translate-y-1 cursor-pointer";
+                    const inputDisabled = !isAvailable ? "disabled" : "";
+
+                    return `
+                    <div class="border-2 rounded-xl transition-all duration-300 ${fullClass}">
+                        <label class="flex items-center p-5 w-full h-full ${!isAvailable ? "cursor-not-allowed" : "cursor-pointer"}">
+                            <input
+                                type="radio"
+                                name="session"
+                                value="${session.id}"
+                                ${inputDisabled}
+                                class="w-5 h-5 mr-5 accent-yellow-500 cursor-pointer"
+                            />
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-3 mb-2">
+                                    <span class="font-bold text-lg text-white bg-gradient-to-br from-yellow-500 to-yellow-600 px-3 py-1 rounded-md shadow-sm">${session.field_code}</span>
+                                    <span class="font-bold text-gray-900 text-lg">${session.field_name}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-5 text-gray-600 text-sm md:text-base mb-3">
+                                    <span class="font-medium flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M224 64C206.3 64 192 78.3 192 96L192 128L160 128C124.7 128 96 156.7 96 192L96 240L544 240L544 192C544 156.7 515.3 128 480 128L448 128L448 96C448 78.3 433.7 64 416 64C398.3 64 384 78.3 384 96L384 128L256 128L256 96C256 78.3 241.7 64 224 64zM96 288L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 288L96 288z"/></svg>
+                                        ${dayName}, ${dateFormatted}
+                                    </span>
+                                    <span class="font-medium flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        ${session.start_time} - ${session.end_time}
+                                    </span>
+                                </div>
+                                <div class="font-bold text-sm px-2 py-1 rounded inline-block ${!isAvailable ? "text-red-600 bg-red-100" : "text-green-600 bg-green-100"}">
+                                    ${
+                                        isAvailable
+                                            ? `Voľné miesta: ${session.available_spots}/${session.max_capacity}`
+                                            : "PLNÉ"
+                                    }
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+                })
+                .join("");
+        }
+
+        async function handleSubmit(e: Event) {
+            e.preventDefault();
+
+            if (!selectedSessionId) {
+                showMessage("Prosím vyberte termín", "error");
+                return;
+            }
+
+            const form = e.target as HTMLFormElement;
+            const formData = new FormData(form);
+
+            const submitBtn = document.getElementById(
+                "submit-btn",
+            ) as HTMLButtonElement;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Prihlasovanie...";
+
+            try {
+                await api.createRegistration({
+                    session_id: selectedSessionId,
+                    student_first_name: formData.get(
+                        "student_first_name",
+                    ) as string,
+                    student_last_name: formData.get(
+                        "student_last_name",
+                    ) as string,
+                    guardian_first_name: formData.get(
+                        "guardian_first_name",
+                    ) as string,
+                    guardian_last_name: formData.get(
+                        "guardian_last_name",
+                    ) as string,
+                    guardian_phone: formData.get("guardian_phone") as string,
+                    guardian_email: formData.get("guardian_email") as string,
+                });
+
+                // Find selected session details
+                const selectedSession = sessions.find(
+                    (s) => s.id === selectedSessionId,
+                );
+
+                // Store registration details for success page
+                if (selectedSession) {
+                    const registrationDetails = {
+                        student: {
+                            firstName: formData.get(
+                                "student_first_name",
+                            ) as string,
+                            lastName: formData.get(
+                                "student_last_name",
+                            ) as string,
+                        },
+                        session: {
+                            fieldCode: selectedSession.field_code,
+                            fieldName: selectedSession.field_name,
+                            date: selectedSession.session_date,
+                            startTime: selectedSession.start_time,
+                            endTime: selectedSession.end_time,
+                        },
+                    };
+                    localStorage.setItem(
+                        "lastRegistration",
+                        JSON.stringify(registrationDetails),
+                    );
+                }
+
+                // Redirect to success page
+                window.location.href = "/success";
+            } catch (error: any) {
+                showMessage(
+                    error.message ||
+                        "Prihlásenie zlyhalo. Skúste to prosím znova.",
+                    "error",
+                );
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Prihlásiť sa";
+            }
+        }
+
+        function showMessage(
+            message: string,
+            type: "success" | "error" | "info",
+        ) {
+            const msgEl = document.getElementById("status-message")!;
+            msgEl.textContent = message;
+
+            // Tailwind classes for status messages
+            let classes =
+                "hidden p-5 rounded-xl mb-8 text-center font-bold shadow-sm";
+            if (type === "success") {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-green-100 text-green-800 border-2 border-green-500 block";
+            } else if (type === "error") {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-red-100 text-red-800 border-2 border-red-500 block";
+            } else {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-blue-100 text-blue-800 border-2 border-blue-500 block";
+            }
+
+            msgEl.className = classes;
+
+            if (type === "success") {
+                setTimeout(() => {
+                    msgEl.className =
+                        "hidden p-5 rounded-xl mb-8 text-center font-bold shadow-sm";
+                }, 5000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSessions();
+            document
+                .getElementById("registration-form")!
+                .addEventListener("submit", handleSubmit);
         });
     </script>
 </Layout>
-
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
-    main {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        width: 100%;
-        gap: 1.5rem;
-    }
-
-    .voting-title {
-        font-family: "Google Sans Flex", sans-serif;
-        font-size: 40px;
-        font-weight: 600;
-        text-align: center;
-        color: #1a1a1a;
-        line-height: 1.3;
-    }
-
-    .divider {
-        width: 60px;
-        height: 4px;
-        background-color: #d4af37;
-        border-radius: 2px;
-    }
-
-    .voting-footer {
-        font-family: "Google Sans Flex", sans-serif;
-        font-size: 1rem;
-        color: #666666;
-    }
-</style>

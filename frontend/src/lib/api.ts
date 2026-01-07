@@ -1,31 +1,44 @@
-export interface Candidate {
+export interface Session {
   id: number;
-  name: string;
+  field_code: string;
+  field_name: string;
+  session_date: string;
+  start_time: string;
+  end_time: string;
+  max_capacity: number;
+  turnus: number;
+  available_spots: number;
 }
 
-export interface VotingStatus {
-  ready: boolean;
-  has_voted: boolean;
+export interface CreateRegistrationRequest {
+  session_id: number;
+  student_first_name: string;
+  student_last_name: string;
+  guardian_first_name: string;
+  guardian_last_name: string;
+  guardian_phone: string;
+  guardian_email: string;
 }
 
-export interface SessionInfo {
-  voter_id: string;
-  name: string;
-}
-
-export interface CandidateResult {
-  name: string;
-  votes: number;
-}
-
-export interface LotteryWinner {
-  name: string;
-  voter_id: string;
-}
-
-export interface AdminStats {
-  voted: number;
-  unvoted: number;
+export interface RegistrationResponse {
+  id: number;
+  session: {
+    id: number;
+    field_code: string;
+    field_name: string;
+    session_date: string;
+    start_time: string;
+    end_time: string;
+    max_capacity: number;
+    turnus: number;
+  };
+  student_first_name: string;
+  student_last_name: string;
+  guardian_first_name: string;
+  guardian_last_name: string;
+  guardian_phone: string;
+  guardian_email: string;
+  created_at: string;
 }
 
 export class ApiError extends Error {
@@ -39,88 +52,77 @@ export class ApiError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    if (response.status === 412) {
+      throw new ApiError(
+        response.status,
+        "Prihlasovanie nie je momentálne povolené",
+      );
+    }
+    if (response.status === 409) {
+      throw new ApiError(response.status, "Tento termín je už plný");
+    }
+    if (response.status === 404) {
+      throw new ApiError(response.status, "Termín nebol nájdený");
+    }
     throw new ApiError(response.status, response.statusText);
   }
-  // Some endpoints might return empty body (e.g. 201 Created with no content, or 200 OK)
-  // But our API mostly returns JSON.
   const text = await response.text();
   return text ? JSON.parse(text) : ({} as T);
 }
 
 export const api = {
-  subscribeToStatus(callback: (status: VotingStatus) => void): WebSocket {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(
-      `${protocol}//${window.location.host}/api/status/ws`,
-    );
-
-    ws.onmessage = (event) => {
-      try {
-        const status = JSON.parse(event.data);
-        callback(status);
-      } catch (e) {
-        console.error("Failed to parse WS message", e);
-      }
-    };
-
-    return ws;
+  async getSessions(): Promise<Session[]> {
+    const res = await fetch("/api/sessions");
+    return handleResponse<Session[]>(res);
   },
 
-  async createSession(name: string): Promise<SessionInfo> {
-    const res = await fetch("/api/session", {
+  async createRegistration(data: CreateRegistrationRequest): Promise<number> {
+    const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(data),
     });
-    return handleResponse<SessionInfo>(res);
+    return handleResponse<number>(res);
   },
 
-  async getSession(): Promise<SessionInfo> {
-    const res = await fetch("/api/session");
-    return handleResponse<SessionInfo>(res);
-  },
-
-  async getCandidates(): Promise<Candidate[]> {
-    const res = await fetch("/api/candidates");
-    return handleResponse<Candidate[]>(res);
-  },
-
-  async castVote(candidateId: number): Promise<void> {
-    const res = await fetch("/api/vote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ candidate_id: candidateId }),
-    });
-    return handleResponse<void>(res);
+  async getRegistrationStatus(): Promise<boolean> {
+    const res = await fetch("/api/status");
+    return handleResponse<boolean>(res);
   },
 
   admin: {
-    async setStatus(action: "start" | "stop"): Promise<void> {
-      const res = await fetch("/api/admin/status", {
+    async login(password: string): Promise<void> {
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) {
+        throw new ApiError(res.status, "Nesprávne heslo");
+      }
+    },
+
+    async logout(): Promise<void> {
+      const res = await fetch("/api/admin/logout", {
+        method: "POST",
       });
       return handleResponse<void>(res);
     },
 
-    async getStats(): Promise<AdminStats> {
-      const res = await fetch("/api/admin/stats");
-      return handleResponse<AdminStats>(res);
+    async checkAuth(): Promise<boolean> {
+      const res = await fetch("/api/admin/check");
+      return handleResponse<boolean>(res);
     },
 
-    async getResults(): Promise<CandidateResult[]> {
-      const res = await fetch("/api/admin/results");
-      return handleResponse<CandidateResult[]>(res);
+    async getRegistrations(): Promise<RegistrationResponse[]> {
+      const res = await fetch("/api/admin/registrations");
+      return handleResponse<RegistrationResponse[]>(res);
     },
 
-    async pickWinner(): Promise<LotteryWinner> {
-      const res = await fetch("/api/admin/lottery");
-      return handleResponse<LotteryWinner>(res);
-    },
-
-    async getStatus(): Promise<boolean> {
-      const res = await fetch("/api/admin/status");
+    async toggleRegistration(): Promise<boolean> {
+      const res = await fetch("/api/admin/toggle", {
+        method: "POST",
+      });
       return handleResponse<boolean>(res);
     },
   },

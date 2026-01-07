@@ -1,0 +1,222 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "../styles/global.css";
+import Calendar from "../icons/Calendar.astro";
+import { Image } from "astro:assets";
+import logoImage from "../assets/soselh-logo.png";
+---
+
+<Layout title="Prihlásenie úspešné">
+    <main
+        class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-4 sm:p-6 relative overflow-hidden"
+    >
+        <!-- Background animation -->
+        <div
+            class="absolute -top-1/2 -right-1/2 w-full h-full bg-[radial-gradient(circle,rgba(255,255,255,0.3)_0%,transparent_70%)] animate-[float_20s_infinite_ease-in-out]"
+        >
+        </div>
+
+        <div
+            class="w-full max-w-[700px] bg-white rounded-3xl shadow-2xl p-8 sm:p-12 text-center border-2 border-green-500/20 relative z-10 animate-[slideUp_0.6s_ease-out]"
+        >
+            <div class="flex justify-center mb-6">
+                <Image
+                    src={logoImage}
+                    alt="Logo SOŠ Elektrotechnická"
+                    class="h-20 w-auto"
+                />
+            </div>
+
+            <h1
+                class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-[#28a745] to-[#20c997] mb-5 drop-shadow-sm"
+            >
+                Prihlásenie bolo úspešné!
+            </h1>
+
+            <p class="text-lg text-gray-600 leading-relaxed mb-10 font-medium">
+                Ďakujeme za prihlásenie na odborové dni. Vaša prihláška bola
+                úspešne odoslaná a uložená do systému.
+            </p>
+
+            <div
+                class="bg-gradient-to-br from-gray-50 to-gray-100 border-l-[5px] border-yellow-500 rounded-xl p-6 sm:p-8 text-left mb-10 shadow-sm border-y border-r border-gray-200"
+            >
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Čo ďalej?</h2>
+                <ul class="space-y-3">
+                    <li
+                        class="pl-9 relative text-gray-700 font-medium leading-relaxed before:absolute before:left-0 before:w-6 before:h-6 before:flex before:items-center before:justify-center before:bg-green-500/10 before:text-green-600 before:font-bold before:rounded-full before:content-['✓']"
+                    >
+                        Kontaktná osoba vás bude v prípade potreby kontaktovať
+                        na uvedený email alebo telefón
+                    </li>
+                    <li
+                        class="pl-9 relative text-gray-700 font-medium leading-relaxed before:absolute before:left-0 before:w-6 before:h-6 before:flex before:items-center before:justify-center before:bg-green-500/10 before:text-green-600 before:font-bold before:rounded-full before:content-['✓']"
+                    >
+                        Prosím, uistite sa že ste dostupní na uvedených
+                        kontaktných údajoch
+                    </li>
+                    <li
+                        class="pl-9 relative text-gray-700 font-medium leading-relaxed before:absolute before:left-0 before:w-6 before:h-6 before:flex before:items-center before:justify-center before:bg-green-500/10 before:text-green-600 before:font-bold before:rounded-full before:content-['✓']"
+                    >
+                        Ak ste sa prihlásili omylom, kontaktujte nás čo najskôr
+                    </li>
+                </ul>
+            </div>
+
+            <div
+                class="flex flex-col sm:flex-row gap-5 justify-center flex-wrap mb-10"
+            >
+                <a
+                    href="/"
+                    class="px-8 py-4 rounded-xl font-bold text-base uppercase tracking-wide transition-all duration-300 relative overflow-hidden group bg-gradient-to-br from-[#d4af37] to-[#c09a2a] text-white shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/40 hover:-translate-y-1"
+                >
+                    <span class="relative z-10">Prihlásiť ďalšieho žiaka</span>
+                    <div
+                        class="absolute top-1/2 left-1/2 w-0 h-0 bg-white/30 rounded-full -translate-x-1/2 -translate-y-1/2 transition-all duration-500 group-hover:w-[300px] group-hover:h-[300px]"
+                    >
+                    </div>
+                </a>
+            </div>
+
+            <div
+                id="session-info"
+                class="hidden bg-gradient-to-br from-[#fff9e6] to-[#fef5d4] border-[3px] border-[#d4af37] rounded-2xl p-6 sm:p-8 mt-10 text-left shadow-lg shadow-yellow-500/20"
+            >
+                <h3
+                    class="text-xl font-bold text-gray-900 mb-6 text-center pb-3 border-b-2 border-[#d4af37]"
+                >
+                    Detail prihlásenia:
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div
+                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
+                    >
+                        <span
+                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
+                            >Žiak:</span
+                        >
+                        <span
+                            class="text-lg font-bold text-gray-900"
+                            id="student-name">-</span
+                        >
+                    </div>
+                    <div
+                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
+                    >
+                        <span
+                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
+                            >Odbor:</span
+                        >
+                        <span
+                            class="text-lg font-bold text-gray-900"
+                            id="field-info">-</span
+                        >
+                    </div>
+                    <div
+                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
+                    >
+                        <span
+                            class="text-xs text-gray-500 font-bold uppercase tracking-wider flex items-center gap-1"
+                        >
+                            <Calendar class="h-3 w-3" />
+                            Dátum:
+                        </span>
+                        <span
+                            class="text-lg font-bold text-gray-900"
+                            id="session-date">-</span
+                        >
+                    </div>
+                    <div
+                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
+                    >
+                        <span
+                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
+                            >Čas:</span
+                        >
+                        <span
+                            class="text-lg font-bold text-gray-900"
+                            id="session-time">-</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="mt-12 text-center text-gray-600/80 text-sm font-semibold relative z-10"
+        >
+            <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
+        </div>
+    </main>
+
+    <script>
+        // Get registration details from localStorage if available
+        const registrationData = localStorage.getItem("lastRegistration");
+
+        if (registrationData) {
+            try {
+                const data = JSON.parse(registrationData);
+                const sessionInfo = document.getElementById("session-info");
+
+                if (sessionInfo && data.student && data.session) {
+                    document.getElementById("student-name")!.textContent =
+                        `${data.student.firstName} ${data.student.lastName}`;
+
+                    document.getElementById("field-info")!.textContent =
+                        `${data.session.fieldCode} - ${data.session.fieldName}`;
+
+                    document.getElementById("session-date")!.textContent =
+                        data.session.date;
+
+                    document.getElementById("session-time")!.textContent =
+                        `${data.session.startTime} - ${data.session.endTime}`;
+
+                    sessionInfo.style.display = "block";
+                }
+
+                // Clear the data after displaying
+                localStorage.removeItem("lastRegistration");
+            } catch (e) {
+                console.error("Error parsing registration data:", e);
+            }
+        }
+    </script>
+</Layout>
+
+<style>
+    /* Custom animations - kept here as they are complex to inline fully in Tailwind classes without config extension */
+    @keyframes float {
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+        50% {
+            transform: translate(-20%, -20%);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes scaleIn {
+        0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.15) rotate(10deg);
+        }
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+</style>

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer base {
+    :root {
+        font-family: "Google Sans Flex", "Inter", system-ui, sans-serif;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply bg-gray-50;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-yellow-500 rounded-full border-4 border-solid border-transparent bg-clip-content;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-yellow-600;
+    }
+}

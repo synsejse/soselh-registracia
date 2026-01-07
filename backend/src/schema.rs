@@ -1,19 +1,48 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    candidates (id) {
-        id -> Integer,
-        #[max_length = 150]
-        name -> Varchar,
+    admin_sessions (session_token) {
+        #[max_length = 36]
+        session_token -> Varchar,
+        created_at -> Nullable<Timestamp>,
+        expires_at -> Nullable<Timestamp>,
+        #[max_length = 45]
+        ip_address -> Nullable<Varchar>,
     }
 }
 
 diesel::table! {
-    presenter_sessions (session_token) {
-        #[max_length = 64]
-        session_token -> Varchar,
+    registrations (id) {
+        id -> Integer,
+        session_id -> Integer,
+        #[max_length = 100]
+        student_first_name -> Varchar,
+        #[max_length = 100]
+        student_last_name -> Varchar,
+        #[max_length = 100]
+        guardian_first_name -> Varchar,
+        #[max_length = 100]
+        guardian_last_name -> Varchar,
+        #[max_length = 20]
+        guardian_phone -> Varchar,
+        #[max_length = 255]
+        guardian_email -> Varchar,
         created_at -> Nullable<Timestamp>,
-        expires_at -> Nullable<Timestamp>,
+    }
+}
+
+diesel::table! {
+    sessions (id) {
+        id -> Integer,
+        #[max_length = 3]
+        field_code -> Varchar,
+        #[max_length = 100]
+        field_name -> Varchar,
+        session_date -> Date,
+        start_time -> Time,
+        end_time -> Time,
+        max_capacity -> Integer,
+        turnus -> Integer,
     }
 }
 
@@ -26,37 +55,6 @@ diesel::table! {
     }
 }
 
-diesel::table! {
-    votes (id) {
-        id -> Integer,
-        #[max_length = 64]
-        session_token -> Varchar,
-        candidate_id -> Integer,
-        voted_at -> Nullable<Timestamp>,
-    }
-}
+diesel::joinable!(registrations -> sessions (session_id));
 
-diesel::table! {
-    voting_sessions (session_token) {
-        #[max_length = 64]
-        session_token -> Varchar,
-        #[max_length = 100]
-        display_name -> Varchar,
-        #[max_length = 45]
-        ip_address -> Nullable<Varchar>,
-        created_at -> Nullable<Timestamp>,
-        #[max_length = 5]
-        voter_id -> Varchar,
-    }
-}
-
-diesel::joinable!(votes -> candidates (candidate_id));
-diesel::joinable!(votes -> voting_sessions (session_token));
-
-diesel::allow_tables_to_appear_in_same_query!(
-    candidates,
-    presenter_sessions,
-    settings,
-    votes,
-    voting_sessions,
-);
+diesel::allow_tables_to_appear_in_same_query!(admin_sessions, registrations, sessions, settings,);

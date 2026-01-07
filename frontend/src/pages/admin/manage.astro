@@ -1,0 +1,508 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import "../../styles/global.css";
+import { Image } from "astro:assets";
+import logoImage from "../../assets/soselh-logo.png";
+---
+
+<Layout title="Admin - Správa prihlásení">
+    <main
+        class="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-300 py-8 px-4 sm:px-6 lg:px-8 flex justify-center items-start"
+    >
+        <div class="max-w-[1600px] w-full flex flex-col">
+            <div
+                class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 p-6 sm:p-8 bg-white rounded-2xl shadow-sm border border-gray-200"
+            >
+                <div class="flex flex-col md:flex-row items-center gap-5">
+                    <Image
+                        src={logoImage}
+                        alt="Logo SOŠ Elektrotechnická"
+                        class="h-16 w-auto"
+                    />
+                    <h1
+                        class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-br from-[#667eea] to-[#764ba2] text-transparent bg-clip-text text-center md:text-left"
+                    >
+                        Správa prihlásení na odborové dni
+                    </h1>
+                </div>
+                <button
+                    id="logout-btn"
+                    class="w-full md:w-auto px-6 py-3 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-red-500/30 hover:shadow-red-500/40 hover:-translate-y-1 hover:from-red-600 hover:to-red-700 transition-all duration-300"
+                    >Odhlásiť sa</button
+                >
+            </div>
+
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10 mb-10"
+            >
+                <h2
+                    class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 pb-4 border-b-4 border-yellow-500 inline-block"
+                >
+                    Akcie
+                </h2>
+                <div
+                    class="flex flex-col lg:flex-row gap-6 justify-center items-center"
+                >
+                    <button
+                        id="toggle-btn"
+                        class="w-full lg:w-auto min-w-[300px] px-8 py-4 rounded-xl font-bold text-lg uppercase tracking-wider shadow-lg transition-all duration-300 hover:-translate-y-1 text-white disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none text-center"
+                    >
+                        <span id="toggle-text">Načítavam...</span>
+                    </button>
+
+                    <button
+                        id="refresh-btn"
+                        class="w-full lg:w-auto px-8 py-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-1 hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                        >Obnoviť zoznam</button
+                    >
+                    <button
+                        id="export-btn"
+                        class="w-full lg:w-auto px-8 py-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg shadow-green-500/30 hover:shadow-green-500/40 hover:-translate-y-1 hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                        >Export do Excelu</button
+                    >
+                </div>
+            </div>
+
+            <div
+                id="status-message"
+                class="hidden p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2"
+            >
+            </div>
+
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10"
+                id="stats-container"
+            >
+                <div
+                    class="bg-white rounded-2xl p-8 text-center border border-gray-200 shadow-sm relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r before:from-yellow-500 before:to-yellow-400"
+                >
+                    <div
+                        class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-yellow-500 to-yellow-400 mb-3"
+                        id="total-registrations"
+                    >
+                        0
+                    </div>
+                    <div
+                        class="text-gray-600 font-semibold uppercase tracking-wider text-sm"
+                    >
+                        Celkový počet prihlásení
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-2xl p-8 text-center border border-gray-200 shadow-sm relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r before:from-yellow-500 before:to-yellow-400"
+                >
+                    <div
+                        class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-yellow-500 to-yellow-400 mb-3"
+                        id="turnus1-count"
+                    >
+                        0
+                    </div>
+                    <div
+                        class="text-gray-600 font-semibold uppercase tracking-wider text-sm"
+                    >
+                        1. turnus
+                    </div>
+                </div>
+                <div
+                    class="bg-white rounded-2xl p-8 text-center border border-gray-200 shadow-sm relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r before:from-yellow-500 before:to-yellow-400"
+                >
+                    <div
+                        class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-yellow-500 to-yellow-400 mb-3"
+                        id="turnus2-count"
+                    >
+                        0
+                    </div>
+                    <div
+                        class="text-gray-600 font-semibold uppercase tracking-wider text-sm"
+                    >
+                        2. turnus
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10 mb-10"
+            >
+                <h2
+                    class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 pb-4 border-b-4 border-yellow-500 inline-block"
+                >
+                    Všetky prihlásenia
+                </h2>
+
+                <div
+                    class="flex flex-col md:flex-row gap-6 mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200"
+                >
+                    <label
+                        class="flex flex-col gap-3 font-semibold text-gray-700 w-full md:w-auto"
+                    >
+                        Filtrovať podľa odboru:
+                        <select
+                            id="field-filter"
+                            class="px-4 py-3 border-2 border-gray-300 rounded-lg text-base min-w-[280px] bg-white focus:outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 hover:border-yellow-500 transition-colors"
+                        >
+                            <option value="">Všetky odbory</option>
+                            <option value="ELE">ELE - Elektrotechnika</option>
+                            <option value="IST"
+                                >IST - Informačné a sieťové technológie</option
+                            >
+                            <option value="MUM">MUM - Multimédia</option>
+                            <option value="MPS"
+                                >MPS - Mechanik počítačových sietí</option
+                            >
+                        </select>
+                    </label>
+                    <label
+                        class="flex flex-col gap-3 font-semibold text-gray-700 w-full md:w-auto"
+                    >
+                        Filtrovať podľa turnusu:
+                        <select
+                            id="turnus-filter"
+                            class="px-4 py-3 border-2 border-gray-300 rounded-lg text-base min-w-[280px] bg-white focus:outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 hover:border-yellow-500 transition-colors"
+                        >
+                            <option value="">Všetky turnusy</option>
+                            <option value="1">1. turnus</option>
+                            <option value="2">2. turnus</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="registrations-list" class="mt-6 overflow-x-auto">
+                    <p
+                        class="text-center text-gray-500 p-6 text-lg font-medium"
+                    >
+                        Načítavam prihlásenia...
+                    </p>
+                </div>
+            </div>
+
+            <div
+                class="mt-auto pt-10 text-center text-gray-500 font-semibold text-sm"
+            >
+                <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        import { api, type RegistrationResponse } from "../../lib/api";
+
+        let allRegistrations: RegistrationResponse[] = [];
+        let registrationEnabled = false;
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const isAuth = await api.admin.checkAuth();
+                if (!isAuth) {
+                    window.location.href = "/admin/login";
+                }
+            } catch (error) {
+                window.location.href = "/admin/login";
+            }
+        }
+
+        async function loadRegistrationStatus() {
+            try {
+                registrationEnabled = await api.getRegistrationStatus();
+                updateToggleButton();
+            } catch (error) {
+                console.error("Error loading status:", error);
+            }
+        }
+
+        async function loadRegistrations() {
+            try {
+                allRegistrations = await api.admin.getRegistrations();
+                updateStats();
+                renderRegistrations();
+            } catch (error: any) {
+                console.error("Error loading registrations:", error);
+                showMessage(
+                    error.message || "Chyba pri načítaní prihlásení",
+                    "error",
+                );
+            }
+        }
+
+        function updateStats() {
+            const total = allRegistrations.length;
+            const turnus1 = allRegistrations.filter(
+                (r) => r.session.turnus === 1,
+            ).length;
+            const turnus2 = allRegistrations.filter(
+                (r) => r.session.turnus === 2,
+            ).length;
+
+            document.getElementById("total-registrations")!.textContent =
+                total.toString();
+            document.getElementById("turnus1-count")!.textContent =
+                turnus1.toString();
+            document.getElementById("turnus2-count")!.textContent =
+                turnus2.toString();
+        }
+
+        function renderRegistrations() {
+            const fieldFilter = (
+                document.getElementById("field-filter") as HTMLSelectElement
+            ).value;
+            const turnusFilter = (
+                document.getElementById("turnus-filter") as HTMLSelectElement
+            ).value;
+
+            let filtered = allRegistrations;
+
+            if (fieldFilter) {
+                filtered = filtered.filter(
+                    (r) => r.session.field_code === fieldFilter,
+                );
+            }
+
+            if (turnusFilter) {
+                filtered = filtered.filter(
+                    (r) => r.session.turnus === parseInt(turnusFilter),
+                );
+            }
+
+            const container = document.getElementById("registrations-list")!;
+
+            if (filtered.length === 0) {
+                container.innerHTML =
+                    '<p class="p-6 text-center text-blue-800 bg-blue-100 border-2 border-blue-500 rounded-lg font-bold">Nenašli sa žiadne prihlásenia podľa zvoleného filtra.</p>';
+                return;
+            }
+
+            // Sort by session date and time
+            const sorted = filtered.sort((a, b) => {
+                const dateA = new Date(
+                    a.session.session_date + " " + a.session.start_time,
+                );
+                const dateB = new Date(
+                    b.session.session_date + " " + b.session.start_time,
+                );
+                return dateA.getTime() - dateB.getTime();
+            });
+
+            // Group by session
+            const groupedBySession: Record<number, RegistrationResponse[]> = {};
+
+            sorted.forEach((reg) => {
+                if (!groupedBySession[reg.session.id]) {
+                    groupedBySession[reg.session.id] = [];
+                }
+                groupedBySession[reg.session.id].push(reg);
+            });
+
+            let html = "";
+
+            for (const sessionId in groupedBySession) {
+                const regs = groupedBySession[sessionId];
+                const session = regs[0].session;
+                const dateObj = new Date(session.session_date);
+                const dayName = [
+                    "Nedeľa",
+                    "Pondelok",
+                    "Utorok",
+                    "Streda",
+                    "Štvrtok",
+                    "Piatok",
+                    "Sobota",
+                ][dateObj.getDay()];
+                const dateFormatted = `${dayName}, ${session.session_date}`;
+
+                html += `
+                <div class="mb-10 bg-white border-2 border-yellow-500 rounded-xl overflow-hidden shadow-lg shadow-yellow-500/10">
+                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 sm:p-8 border-b-2 border-yellow-500">
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 flex flex-wrap items-center gap-4">
+                            <span class="font-extrabold text-white bg-gradient-to-br from-yellow-500 to-yellow-600 px-4 py-1 rounded-lg text-lg shadow-sm tracking-wide">${session.field_code}</span>
+                            ${session.field_name}
+                        </h3>
+                        <div class="flex flex-wrap gap-4 sm:gap-6 text-gray-600 font-medium text-base">
+                            <span class="bg-blue-50 text-blue-700 px-4 py-1 rounded-md border border-blue-200 font-bold">${session.turnus}. turnus</span>
+                            <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M224 64C206.3 64 192 78.3 192 96L192 128L160 128C124.7 128 96 156.7 96 192L96 240L544 240L544 192C544 156.7 515.3 128 480 128L448 128L448 96C448 78.3 433.7 64 416 64C398.3 64 384 78.3 384 96L384 128L256 128L256 96C256 78.3 241.7 64 224 64zM96 288L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 288L96 288z"/></svg>${dateFormatted}</span>
+                            <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>${session.start_time} - ${session.end_time}</span>
+                            <span class="bg-green-50 text-green-700 px-4 py-1 rounded-md border border-green-200 font-bold">${regs.length} prihlásení</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap first:rounded-tl-none">ID</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Meno žiaka</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Priezvisko žiaka</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Meno zástupcu</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Priezvisko zástupcu</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Telefón</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Email</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 text-sm uppercase tracking-wider whitespace-nowrap last:rounded-tr-none">Dátum prihlásenia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${regs
+                                    .map(
+                                        (reg, index) => `
+                                    <tr class="${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-yellow-50 transition-colors duration-200">
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.id}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.student_first_name}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.student_last_name}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600">${reg.guardian_first_name}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600">${reg.guardian_last_name}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 font-mono text-sm">${reg.guardian_phone}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 font-mono text-sm">${reg.guardian_email}</td>
+                                        <td class="p-4 border-b border-gray-200 text-gray-600 text-sm">${formatDateTime(reg.created_at)}</td>
+                                    </tr>
+                                `,
+                                    )
+                                    .join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function formatDateTime(dateTimeStr: string): string {
+            // Format: YYYY-MM-DD HH:MM:SS
+            const date = new Date(dateTimeStr);
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+            return `${day}.${month}.${year} ${hours}:${minutes}`;
+        }
+
+        async function toggleRegistration() {
+            const btn = document.getElementById(
+                "toggle-btn",
+            ) as HTMLButtonElement;
+            btn.disabled = true;
+
+            try {
+                await api.admin.toggleRegistration();
+                const newStatus = !registrationEnabled;
+                registrationEnabled = newStatus;
+                updateToggleButton();
+                showMessage(
+                    `Prihlasovanie bolo ${newStatus ? "zapnuté" : "vypnuté"}`,
+                    "success",
+                );
+            } catch (error: any) {
+                showMessage(error.message || "Chyba pri zmene stavu", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function updateToggleButton() {
+            const btn = document.getElementById("toggle-btn")!;
+            const text = document.getElementById("toggle-text")!;
+
+            if (registrationEnabled) {
+                text.textContent = "Prihlasovanie je ZAPNUTÉ";
+                btn.className =
+                    "w-full md:w-auto md:min-w-[400px] px-8 py-4 rounded-xl font-bold text-lg uppercase tracking-wider shadow-lg transition-all duration-300 hover:-translate-y-1 text-white bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/30 hover:shadow-green-500/40 hover:from-green-600 hover:to-green-700";
+            } else {
+                text.textContent = "Prihlasovanie je VYPNUTÉ";
+                btn.className =
+                    "w-full md:w-auto md:min-w-[400px] px-8 py-4 rounded-xl font-bold text-lg uppercase tracking-wider shadow-lg transition-all duration-300 hover:-translate-y-1 text-white bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30 hover:shadow-red-500/40 hover:from-red-600 hover:to-red-700";
+            }
+        }
+
+        function showMessage(
+            message: string,
+            type: "success" | "error" | "info",
+        ) {
+            const msgEl = document.getElementById("status-message")!;
+
+            let classes =
+                "hidden p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2";
+            if (type === "success") {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-green-100 text-green-800 border-green-500 block";
+            } else if (type === "error") {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-red-100 text-red-800 border-red-500 block";
+            } else {
+                classes =
+                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-blue-100 text-blue-800 border-blue-500 block";
+            }
+
+            msgEl.className = classes;
+            msgEl.textContent = message;
+
+            setTimeout(() => {
+                msgEl.className =
+                    "hidden p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2";
+            }, 5000);
+        }
+
+        // Logout handler
+        async function handleLogout() {
+            try {
+                await api.admin.logout();
+                window.location.href = "/admin/login";
+            } catch (error) {
+                console.error("Error during logout:", error);
+                window.location.href = "/admin/login";
+            }
+        }
+
+        async function handleExport() {
+            try {
+                const response = await fetch("/api/admin/registrations/export");
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "registracie.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                    showMessage("Export bol úspešný", "success");
+                } else {
+                    showMessage("Chyba pri exporte", "error");
+                }
+            } catch (error) {
+                console.error("Error exporting:", error);
+                showMessage("Chyba pri exporte", "error");
+            }
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", async () => {
+            await checkAuth();
+            loadRegistrationStatus();
+            loadRegistrations();
+
+            document
+                .getElementById("toggle-btn")!
+                .addEventListener("click", toggleRegistration);
+            document
+                .getElementById("refresh-btn")!
+                .addEventListener("click", () => {
+                    loadRegistrations();
+                    showMessage("Zoznam bol obnovený", "info");
+                });
+            document
+                .getElementById("logout-btn")!
+                .addEventListener("click", handleLogout);
+
+            document
+                .getElementById("export-btn")!
+                .addEventListener("click", handleExport);
+
+            document
+                .getElementById("field-filter")!
+                .addEventListener("change", renderRegistrations);
+            document
+                .getElementById("turnus-filter")!
+                .addEventListener("change", renderRegistrations);
+        });
+    </script>
+</Layout>

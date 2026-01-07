@@ -1,4 +1,4 @@
-// Main application entry point
+// Main application entry point - School Registration System
 
 #[macro_use]
 extern crate rocket;
@@ -15,11 +15,11 @@ use rocket_db_pools::Database;
 use std::sync::atomic::AtomicBool;
 use tokio::sync::broadcast;
 
-use db::VotingDB;
-use routes::voting;
+use db::RegistrationDB;
+use routes::registration;
 
 pub struct AppState {
-    pub voting_enabled: AtomicBool,
+    pub registration_enabled: AtomicBool,
     pub tx: broadcast::Sender<bool>,
     pub presenter_password_hash: String,
 }
@@ -35,7 +35,7 @@ async fn load_initial_state(
         use schema::settings::dsl::*;
 
         settings
-            .find("voting_enabled")
+            .find("registration_enabled")
             .select(value)
             .first::<String>(&mut conn)
             .map(|v| v == "true")
@@ -50,7 +50,7 @@ async fn load_initial_state(
         std::env::var("PRESENTER_PASSWORD_HASH").expect("PRESENTER_PASSWORD_HASH must be set");
 
     rocket.manage(AppState {
-        voting_enabled: AtomicBool::new(enabled),
+        registration_enabled: AtomicBool::new(enabled),
         tx,
         presenter_password_hash,
     })
@@ -65,7 +65,7 @@ fn rocket() -> _ {
     // Allow setting database URL via environment variable
     if let Ok(database_url) = std::env::var("DATABASE_URL") {
         figment = figment.merge((
-            "databases.voting_db",
+            "databases.registration_db",
             rocket_db_pools::Config {
                 url: database_url,
                 min_connections: Some(1),
@@ -78,26 +78,21 @@ fn rocket() -> _ {
     }
 
     rocket::custom(figment)
-        .attach(VotingDB::init())
+        .attach(RegistrationDB::init())
         .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
-        .attach(AdHoc::on_ignite("Database Seeding", db::run_seeding))
         .attach(AdHoc::on_ignite("Load Initial State", load_initial_state))
         .mount(
             "/api",
             routes![
-                voting::client::create_session,
-                voting::client::get_session_info,
-                voting::client::get_candidates,
-                voting::client::cast_vote,
-                voting::client::voting_status_ws,
-                voting::admin::presenter_login,
-                voting::admin::presenter_logout,
-                voting::admin::presenter_check,
-                voting::admin::get_status,
-                voting::admin::set_voting_status,
-                voting::admin::get_stats,
-                voting::admin::get_results,
-                voting::admin::pick_winner
+                registration::client::get_sessions,
+                registration::client::create_registration,
+                registration::client::get_registration_status,
+                registration::admin::admin_login,
+                registration::admin::admin_logout,
+                registration::admin::admin_check,
+                registration::admin::get_all_registrations,
+                registration::admin::toggle_registration,
+                registration::admin::export_registrations_excel,
             ],
         )
         .mount("/", FileServer::from("/app/static"))
