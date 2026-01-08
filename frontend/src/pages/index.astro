@@ -1,8 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import "../styles/global.css";
 import Phone from "../icons/Phone.astro";
 import Envelope from "../icons/Envelope.astro";
+import Calendar from "../icons/Calendar.astro";
+import Clock from "../icons/Clock.astro";
 import { Image } from "astro:assets";
 import logoImage from "../assets/soselh-logo.png";
 ---
@@ -195,10 +196,24 @@ import logoImage from "../assets/soselh-logo.png";
                 <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
             </div>
         </div>
+
+        <!-- Hidden icon templates for JavaScript to reference -->
+        <template id="calendar-icon-template">
+            <Calendar class="h-4 w-4" />
+        </template>
+        <template id="clock-icon-template">
+            <Clock class="h-4 w-4" />
+        </template>
     </main>
 
     <script>
         import { api, type Session } from "../lib/api";
+
+        // Get icon HTML from templates
+        const CALENDAR_ICON =
+            document.getElementById("calendar-icon-template")?.innerHTML ?? "";
+        const CLOCK_ICON =
+            document.getElementById("clock-icon-template")?.innerHTML ?? "";
 
         let sessions: Session[] = [];
         let selectedSessionId: number | null = null;
@@ -315,11 +330,11 @@ import logoImage from "../assets/soselh-logo.png";
                                 </div>
                                 <div class="flex flex-wrap gap-5 text-gray-600 text-sm md:text-base mb-3">
                                     <span class="font-medium flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M224 64C206.3 64 192 78.3 192 96L192 128L160 128C124.7 128 96 156.7 96 192L96 240L544 240L544 192C544 156.7 515.3 128 480 128L448 128L448 96C448 78.3 433.7 64 416 64C398.3 64 384 78.3 384 96L384 128L256 128L256 96C256 78.3 241.7 64 224 64zM96 288L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 288L96 288z"/></svg>
+                                        ${CALENDAR_ICON}
                                         ${dayName}, ${dateFormatted}
                                     </span>
                                     <span class="font-medium flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        ${CLOCK_ICON}
                                         ${session.start_time} - ${session.end_time}
                                     </span>
                                 </div>
@@ -422,28 +437,22 @@ import logoImage from "../assets/soselh-logo.png";
             type: "success" | "error" | "info",
         ) {
             const msgEl = document.getElementById("status-message")!;
+            const baseClasses =
+                "p-5 rounded-xl mb-8 text-center font-bold shadow-sm border-2";
+
+            const typeClasses: Record<string, string> = {
+                success: "bg-green-100 text-green-800 border-green-500",
+                error: "bg-red-100 text-red-800 border-red-500",
+                info: "bg-blue-100 text-blue-800 border-blue-500",
+            };
+
+            msgEl.className = `${baseClasses} ${typeClasses[type]}`;
             msgEl.textContent = message;
-
-            // Tailwind classes for status messages
-            let classes =
-                "hidden p-5 rounded-xl mb-8 text-center font-bold shadow-sm";
-            if (type === "success") {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-green-100 text-green-800 border-2 border-green-500 block";
-            } else if (type === "error") {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-red-100 text-red-800 border-2 border-red-500 block";
-            } else {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold shadow-sm bg-blue-100 text-blue-800 border-2 border-blue-500 block";
-            }
-
-            msgEl.className = classes;
+            msgEl.classList.remove("hidden");
 
             if (type === "success") {
                 setTimeout(() => {
-                    msgEl.className =
-                        "hidden p-5 rounded-xl mb-8 text-center font-bold shadow-sm";
+                    msgEl.classList.add("hidden");
                 }, 5000);
             }
         }

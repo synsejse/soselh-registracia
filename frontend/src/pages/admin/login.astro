@@ -1,6 +1,5 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import "../../styles/global.css";
 import { Image } from "astro:assets";
 import logoImage from "../../assets/soselh-logo.png";
 ---
@@ -136,11 +135,11 @@ import logoImage from "../../assets/soselh-logo.png";
 
         function showError(message: string) {
             errorMessage.textContent = message;
-            errorMessage.style.display = "block";
+            errorMessage.classList.remove("hidden");
         }
 
         function hideError() {
-            errorMessage.style.display = "none";
+            errorMessage.classList.add("hidden");
         }
 
         // Check if already authenticated

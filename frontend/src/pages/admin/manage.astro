@@ -1,8 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import "../../styles/global.css";
 import { Image } from "astro:assets";
 import logoImage from "../../assets/soselh-logo.png";
+import Calendar from "../../icons/Calendar.astro";
+import Clock from "../../icons/Clock.astro";
 ---
 
 <Layout title="Admin - Správa prihlásení">
@@ -181,10 +182,67 @@ import logoImage from "../../assets/soselh-logo.png";
                 <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
             </div>
         </div>
+
+        <!-- Confirmation Modal -->
+        <div
+            id="confirm-modal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+            <!-- Backdrop -->
+            <div
+                id="modal-backdrop"
+                class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            >
+            </div>
+            <!-- Modal Content -->
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-200 animate-[slideUp_0.3s_ease-out]"
+            >
+                <h3
+                    class="text-2xl font-bold text-gray-900 mb-4 text-center"
+                    id="modal-title"
+                >
+                    Potvrdiť zmenu
+                </h3>
+                <p
+                    class="text-gray-600 text-center mb-8 text-lg"
+                    id="modal-message"
+                >
+                </p>
+                <div class="flex gap-4 justify-center">
+                    <button
+                        id="modal-cancel"
+                        class="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold uppercase tracking-wider hover:bg-gray-300 transition-all duration-300"
+                    >
+                        Zrušiť
+                    </button>
+                    <button
+                        id="modal-confirm"
+                        class="px-6 py-3 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:from-yellow-600 hover:to-yellow-700 hover:-translate-y-1 transition-all duration-300"
+                    >
+                        Potvrdiť
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden icon templates for JavaScript to reference -->
+        <template id="calendar-icon-template">
+            <Calendar class="h-5 w-5" />
+        </template>
+        <template id="clock-icon-template">
+            <Clock class="h-5 w-5" />
+        </template>
     </main>
 
     <script>
         import { api, type RegistrationResponse } from "../../lib/api";
+
+        // Get icon HTML from templates
+        const CALENDAR_ICON =
+            document.getElementById("calendar-icon-template")?.innerHTML ?? "";
+        const CLOCK_ICON =
+            document.getElementById("clock-icon-template")?.innerHTML ?? "";
 
         let allRegistrations: RegistrationResponse[] = [];
         let registrationEnabled = false;
@@ -318,8 +376,8 @@ import logoImage from "../../assets/soselh-logo.png";
                         </h3>
                         <div class="flex flex-wrap gap-4 sm:gap-6 text-gray-600 font-medium text-base">
                             <span class="bg-blue-50 text-blue-700 px-4 py-1 rounded-md border border-blue-200 font-bold">${session.turnus}. turnus</span>
-                            <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M224 64C206.3 64 192 78.3 192 96L192 128L160 128C124.7 128 96 156.7 96 192L96 240L544 240L544 192C544 156.7 515.3 128 480 128L448 128L448 96C448 78.3 433.7 64 416 64C398.3 64 384 78.3 384 96L384 128L256 128L256 96C256 78.3 241.7 64 224 64zM96 288L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 288L96 288z"/></svg>${dateFormatted}</span>
-                            <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>${session.start_time} - ${session.end_time}</span>
+                            <span class="flex items-center gap-1">${CALENDAR_ICON}${dateFormatted}</span>
+                            <span class="flex items-center gap-1">${CLOCK_ICON}${session.start_time} - ${session.end_time}</span>
                             <span class="bg-green-50 text-green-700 px-4 py-1 rounded-md border border-green-200 font-bold">${regs.length} prihlásení</span>
                         </div>
                     </div>
@@ -375,7 +433,49 @@ import logoImage from "../../assets/soselh-logo.png";
             return `${day}.${month}.${year} ${hours}:${minutes}`;
         }
 
+        function showConfirmModal(): Promise<boolean> {
+            return new Promise((resolve) => {
+                const modal = document.getElementById("confirm-modal")!;
+                const modalMessage = document.getElementById("modal-message")!;
+                const confirmBtn = document.getElementById("modal-confirm")!;
+                const cancelBtn = document.getElementById("modal-cancel")!;
+                const backdrop = document.getElementById("modal-backdrop")!;
+
+                // Set message based on current state
+                const newState = !registrationEnabled;
+                modalMessage.textContent = newState
+                    ? "Naozaj chcete ZAPNÚŤ prihlasovanie? Používatelia sa budú môcť prihlasovať na odborové dni."
+                    : "Naozaj chcete VYPNÚŤ prihlasovanie? Používatelia sa nebudú môcť prihlasovať na odborové dni.";
+
+                modal.classList.remove("hidden");
+
+                const cleanup = () => {
+                    modal.classList.add("hidden");
+                    confirmBtn.removeEventListener("click", handleConfirm);
+                    cancelBtn.removeEventListener("click", handleCancel);
+                    backdrop.removeEventListener("click", handleCancel);
+                };
+
+                const handleConfirm = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                confirmBtn.addEventListener("click", handleConfirm);
+                cancelBtn.addEventListener("click", handleCancel);
+                backdrop.addEventListener("click", handleCancel);
+            });
+        }
+
         async function toggleRegistration() {
+            const confirmed = await showConfirmModal();
+            if (!confirmed) return;
+
             const btn = document.getElementById(
                 "toggle-btn",
             ) as HTMLButtonElement;
@@ -417,26 +517,21 @@ import logoImage from "../../assets/soselh-logo.png";
             type: "success" | "error" | "info",
         ) {
             const msgEl = document.getElementById("status-message")!;
+            const baseClasses =
+                "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2";
 
-            let classes =
-                "hidden p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2";
-            if (type === "success") {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-green-100 text-green-800 border-green-500 block";
-            } else if (type === "error") {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-red-100 text-red-800 border-red-500 block";
-            } else {
-                classes =
-                    "p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2 bg-blue-100 text-blue-800 border-blue-500 block";
-            }
+            const typeClasses: Record<string, string> = {
+                success: "bg-green-100 text-green-800 border-green-500",
+                error: "bg-red-100 text-red-800 border-red-500",
+                info: "bg-blue-100 text-blue-800 border-blue-500",
+            };
 
-            msgEl.className = classes;
+            msgEl.className = `${baseClasses} ${typeClasses[type]}`;
             msgEl.textContent = message;
+            msgEl.classList.remove("hidden");
 
             setTimeout(() => {
-                msgEl.className =
-                    "hidden p-5 rounded-xl mb-8 text-center font-bold text-lg shadow-sm border-2";
+                msgEl.classList.add("hidden");
             }, 5000);
         }
 
@@ -506,3 +601,16 @@ import logoImage from "../../assets/soselh-logo.png";
         });
     </script>
 </Layout>
+
+<style>
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>
