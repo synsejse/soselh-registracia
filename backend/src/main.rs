@@ -7,7 +7,9 @@ mod db;
 mod models;
 mod routes;
 mod schema;
+mod config;
 
+use config::AppConfig;
 use diesel::prelude::*;
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
@@ -27,8 +29,10 @@ pub struct AppState {
 async fn load_initial_state(
     rocket: rocket::Rocket<rocket::Build>,
 ) -> rocket::Rocket<rocket::Build> {
-    let enabled = rocket::tokio::task::spawn_blocking(|| {
-        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let config = rocket.state::<AppConfig>().expect("AppConfig not managed").clone();
+    let database_url = config.database_url.clone();
+
+    let enabled = rocket::tokio::task::spawn_blocking(move || {
         let mut conn = diesel::MysqlConnection::establish(&database_url)
             .expect("Failed to connect to DB for state loading");
 
@@ -46,8 +50,7 @@ async fn load_initial_state(
 
     let (tx, _) = broadcast::channel(100);
 
-    let presenter_password_hash =
-        std::env::var("PRESENTER_PASSWORD_HASH").expect("PRESENTER_PASSWORD_HASH must be set");
+    let presenter_password_hash = config.presenter_password_hash.clone();
 
     rocket.manage(AppState {
         registration_enabled: AtomicBool::new(enabled),
@@ -57,27 +60,27 @@ async fn load_initial_state(
 }
 
 #[rocket::launch]
-fn rocket() -> _ {
+fn rocket() -> rocket::Rocket<rocket::Build> {
     dotenvy::dotenv().ok();
 
-    let mut figment = rocket::config::Config::figment();
+    let config = AppConfig::load();
+    let mut figment = rocket::config::Config::figment()
+        .merge(("port", config.rocket_port));
 
-    // Allow setting database URL via environment variable
-    if let Ok(database_url) = std::env::var("DATABASE_URL") {
-        figment = figment.merge((
-            "databases.registration_db",
-            rocket_db_pools::Config {
-                url: database_url,
-                min_connections: Some(1),
-                max_connections: 1024,
-                connect_timeout: 3,
-                idle_timeout: None,
-                extensions: None,
-            },
-        ));
-    }
+    figment = figment.merge((
+        "databases.registration_db",
+        rocket_db_pools::Config {
+            url: config.database_url.clone(),
+            min_connections: Some(1),
+            max_connections: 1024,
+            connect_timeout: 3,
+            idle_timeout: None,
+            extensions: None,
+        },
+    ));
 
     rocket::custom(figment)
+        .manage(config)
         .attach(RegistrationDB::init())
         .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
         .attach(AdHoc::on_ignite("Load Initial State", load_initial_state))

@@ -1,0 +1,11 @@
+# Database connection string
+database_url = "mysql://user:password@localhost/registration_db"
+
+# Hash of the presenter password (bcrypt)
+presenter_password_hash = "$2y$12$..."
+
+# Rocket port (default: 8000)
+rocket_port = 8000
+
+# Note: You can also override these settings using environment variables:
+# DATABASE_URL, PRESENTER_PASSWORD_HASH, ROCKET_PORT
