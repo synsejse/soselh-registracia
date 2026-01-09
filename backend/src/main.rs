@@ -23,17 +23,16 @@ use routes::registration;
 pub struct AppState {
     pub registration_enabled: AtomicBool,
     pub tx: broadcast::Sender<bool>,
-    pub presenter_password_hash: String,
+    pub admin_password_hash: String,
 }
 
 async fn load_initial_state(
     rocket: rocket::Rocket<rocket::Build>,
 ) -> rocket::Rocket<rocket::Build> {
     let config = rocket.state::<AppConfig>().expect("AppConfig not managed").clone();
-    let database_url = config.database_url.clone();
 
     let enabled = rocket::tokio::task::spawn_blocking(move || {
-        let mut conn = diesel::MysqlConnection::establish(&database_url)
+        let mut conn = diesel::MysqlConnection::establish(&config.database_url)
             .expect("Failed to connect to DB for state loading");
 
         use schema::settings::dsl::*;
@@ -50,12 +49,12 @@ async fn load_initial_state(
 
     let (tx, _) = broadcast::channel(100);
 
-    let presenter_password_hash = config.presenter_password_hash.clone();
+    let admin_password_hash = config.admin_password_hash.clone();
 
     rocket.manage(AppState {
         registration_enabled: AtomicBool::new(enabled),
         tx,
-        presenter_password_hash,
+        admin_password_hash,
     })
 }
 
@@ -65,7 +64,8 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
 
     let config = AppConfig::load();
     let mut figment = rocket::config::Config::figment()
-        .merge(("port", config.rocket_port));
+        .merge(("port", config.rocket_port))
+        .merge(("address", &config.rocket_address));
 
     figment = figment.merge((
         "databases.registration_db",
@@ -80,7 +80,7 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
     ));
 
     rocket::custom(figment)
-        .manage(config)
+        .manage(config.clone())
         .attach(RegistrationDB::init())
         .attach(AdHoc::on_ignite("Database Migrations", db::run_migrations))
         .attach(AdHoc::on_ignite("Load Initial State", load_initial_state))
@@ -98,6 +98,6 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
                 registration::admin::export_registrations_excel,
             ],
         )
-        .mount("/", FileServer::from("/app/static"))
+        .mount("/", FileServer::from(&config.static_dir))
         .register("/", catchers![routes::not_found, routes::unauthorized])
 }

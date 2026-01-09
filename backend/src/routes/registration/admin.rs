@@ -42,7 +42,7 @@ pub async fn admin_login(
     cookies: &CookieJar<'_>,
     login: Json<AdminLoginRequest>,
 ) -> Result<Status, Status> {
-    if verify(&login.password, &state.presenter_password_hash).unwrap_or(false) {
+    if verify(&login.password, &state.admin_password_hash).unwrap_or(false) {
         let token = Uuid::new_v4().to_string();
         let new_session = NewAdminSession {
             session_token: token.clone(),

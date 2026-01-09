@@ -17,15 +17,14 @@ const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 /// Run pending database migrations
 pub async fn run_migrations(rocket: Rocket<rocket::Build>) -> Rocket<rocket::Build> {
-    let database_url = rocket.state::<AppConfig>()
+    let config = rocket.state::<AppConfig>()
         .expect("AppConfig not managed")
-        .database_url
         .clone();
 
     // Run migrations in a blocking task since MigrationHarness requires sync connection
     let result: Result<Vec<String>, String> = rocket::tokio::task::spawn_blocking(move || {
         // Establish a new synchronous connection for migrations
-        let mut sync_conn = diesel::MysqlConnection::establish(&database_url)
+        let mut sync_conn = diesel::MysqlConnection::establish(&config.database_url)
             .map_err(|e| format!("Failed to establish connection: {}", e))?;
 
         // Run migrations
