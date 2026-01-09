@@ -38,6 +38,7 @@ export interface RegistrationResponse {
   guardian_last_name: string;
   guardian_phone: string;
   guardian_email: string;
+  confirmed: boolean;
   created_at: string;
 }
 
@@ -117,6 +118,36 @@ export const api = {
     async getRegistrations(): Promise<RegistrationResponse[]> {
       const res = await fetch("/api/admin/registrations");
       return handleResponse<RegistrationResponse[]>(res);
+    },
+
+    async confirmRegistration(id: number): Promise<void> {
+      const res = await fetch(`/api/admin/registrations/${id}/confirm`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new ApiError(res.status, "Nepodarilo sa potvrdiť registráciu");
+    },
+
+    async deleteRegistration(id: number): Promise<void> {
+      const res = await fetch(`/api/admin/registrations/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new ApiError(res.status, "Nepodarilo sa zmazať registráciu");
+    },
+
+    async exportRegistrations(): Promise<void> {
+      const res = await fetch("/api/admin/registrations/export");
+      if (!res.ok) throw new ApiError(res.status, "Nepodarilo sa exportovať registrácie");
+
+      // Handle file download
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `registrations-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     },
 
     async toggleRegistration(): Promise<boolean> {

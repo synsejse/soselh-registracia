@@ -96,6 +96,8 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
                 registration::admin::get_all_registrations,
                 registration::admin::toggle_registration,
                 registration::admin::export_registrations_excel,
+                registration::admin::confirm_registration,
+                registration::admin::delete_registration,
             ],
         )
         .mount("/", FileServer::from(&config.static_dir))

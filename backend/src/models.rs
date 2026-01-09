@@ -28,6 +28,7 @@ pub struct Registration {
     pub guardian_last_name: String,
     pub guardian_phone: String,
     pub guardian_email: String,
+    pub confirmed: bool,
     pub created_at: Option<NaiveDateTime>,
 }
 
@@ -88,6 +89,7 @@ pub struct RegistrationResponse {
     pub guardian_last_name: String,
     pub guardian_phone: String,
     pub guardian_email: String,
+    pub confirmed: bool,
     pub created_at: String,
 }
 

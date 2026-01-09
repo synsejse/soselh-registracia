@@ -73,57 +73,14 @@ import Logo from "../icons/Logo.astro";
                 >
                     Detail prihlásenia:
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div
-                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
-                    >
-                        <span
-                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
-                            >Žiak:</span
-                        >
-                        <span
-                            class="text-lg font-bold text-gray-900"
-                            id="student-name">-</span
-                        >
-                    </div>
-                    <div
-                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
-                    >
-                        <span
-                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
-                            >Odbor:</span
-                        >
-                        <span
-                            class="text-lg font-bold text-gray-900"
-                            id="field-info">-</span
-                        >
-                    </div>
-                    <div
-                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
-                    >
-                        <span
-                            class="text-xs text-gray-500 font-bold uppercase tracking-wider flex items-center gap-1"
-                        >
-                            <Calendar class="h-3 w-3" />
-                            Dátum:
-                        </span>
-                        <span
-                            class="text-lg font-bold text-gray-900"
-                            id="session-date">-</span
-                        >
-                    </div>
-                    <div
-                        class="flex flex-col gap-1 p-4 bg-white rounded-lg border border-[#d4af37]/30 shadow-sm"
-                    >
-                        <span
-                            class="text-xs text-gray-500 font-bold uppercase tracking-wider"
-                            >Čas:</span
-                        >
-                        <span
-                            class="text-lg font-bold text-gray-900"
-                            id="session-time">-</span
-                        >
-                    </div>
+
+                <div class="mb-6 text-center">
+                     <span class="text-gray-600 font-bold uppercase tracking-wider text-sm block mb-1">Žiak:</span>
+                     <span class="text-2xl font-extrabold text-gray-900" id="student-name">-</span>
+                </div>
+
+                <div id="sessions-list" class="flex flex-col gap-6">
+                    <!-- Javascript will populate this -->
                 </div>
             </div>
         </div>
@@ -143,21 +100,65 @@ import Logo from "../icons/Logo.astro";
             try {
                 const data = JSON.parse(registrationData);
                 const sessionInfo = document.getElementById("session-info");
+                const sessionsList = document.getElementById("sessions-list");
 
-                if (sessionInfo && data.student && data.session) {
+                if (sessionInfo && sessionsList && data.student) {
                     document.getElementById("student-name")!.textContent =
                         `${data.student.firstName} ${data.student.lastName}`;
 
-                    document.getElementById("field-info")!.textContent =
-                        `${data.session.fieldCode} - ${data.session.fieldName}`;
+                    // Handle normalized sessions array (new format) or single session (old format)
+                    let sessions = [];
+                    if (data.sessions && Array.isArray(data.sessions)) {
+                        sessions = data.sessions;
+                    } else if (data.session) {
+                        sessions = [data.session];
+                    }
 
-                    document.getElementById("session-date")!.textContent =
-                        data.session.date;
+                    if (sessions.length > 0) {
+                         // Sort sessions by date and time
+                         sessions.sort((a: any, b: any) => {
+                             const dateA = new Date(a.date + " " + a.startTime);
+                             const dateB = new Date(b.date + " " + b.startTime);
+                             return dateA.getTime() - dateB.getTime();
+                         });
 
-                    document.getElementById("session-time")!.textContent =
-                        `${data.session.startTime} - ${data.session.endTime}`;
+                         sessions.forEach((session: any) => {
+                             const sessionEl = document.createElement('div');
+                             sessionEl.className = "bg-white rounded-xl border border-[#d4af37]/30 shadow-sm overflow-hidden";
 
-                    sessionInfo.classList.remove("hidden");
+                             const turnusText = session.turnus ? `<div class="bg-[#d4af37]/10 text-[#d4af37] font-bold text-xs uppercase px-4 py-1 border-b border-[#d4af37]/20">${session.turnus}. turnus</div>` : '';
+
+                             // SVG Icons
+                             const calendarIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
+                             const clockIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+
+                             sessionEl.innerHTML = `
+                                ${turnusText}
+                                <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">Odbor</span>
+                                        <span class="text-lg font-bold text-gray-900">${session.fieldCode} - ${session.fieldName}</span>
+                                    </div>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-xs text-gray-500 font-bold uppercase tracking-wider">Termín</span>
+                                        <div class="flex flex-col">
+                                            <span class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                                ${calendarIcon}
+                                                ${session.date}
+                                            </span>
+                                            <span class="text-base font-medium text-gray-600 flex items-center gap-2">
+                                                ${clockIcon}
+                                                ${session.startTime} - ${session.endTime}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                             `;
+                             sessionsList.appendChild(sessionEl);
+                         });
+
+                         sessionInfo.classList.remove("hidden");
+                    }
                 }
 
                 // Clear the data after displaying

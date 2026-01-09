@@ -3,6 +3,8 @@ import Layout from "../../layouts/Layout.astro";
 import Calendar from "../../icons/Calendar.astro";
 import Clock from "../../icons/Clock.astro";
 import Logo from "../../icons/Logo.astro";
+import Check from "../../icons/Check.astro";
+import Trash from "../../icons/Trash.astro";
 ---
 
 <Layout title="Admin - Správa prihlásení">
@@ -181,6 +183,54 @@ import Logo from "../../icons/Logo.astro";
             </div>
         </div>
 
+        <!-- Export Modal -->
+        <div
+            id="export-modal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+            <!-- Backdrop -->
+            <div
+                id="export-backdrop"
+                class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            >
+            </div>
+            <!-- Modal Content -->
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-200 animate-[slideUp_0.3s_ease-out]"
+            >
+                <h3
+                    class="text-2xl font-bold text-gray-900 mb-6 text-center"
+                >
+                    Exportovať do Excelu
+                </h3>
+
+                <div class="mb-8">
+                    <label class="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-yellow-500 transition-colors">
+                        <input type="checkbox" id="export-include-unconfirmed" class="w-6 h-6 accent-yellow-500 flex-shrink-0 cursor-pointer">
+                        <span class="text-gray-700 font-medium select-none">Zahrnúť aj nepotvrdené (červené) registrácie</span>
+                    </label>
+                    <p class="mt-2 text-sm text-gray-500 px-1">
+                        V predvolenom nastavení sa exportujú iba potvrdené registrácie.
+                    </p>
+                </div>
+
+                <div class="flex gap-4 justify-center">
+                    <button
+                        id="export-cancel"
+                        class="px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-bold uppercase tracking-wider hover:bg-gray-300 transition-all duration-300"
+                    >
+                        Zrušiť
+                    </button>
+                    <button
+                        id="export-confirm"
+                        class="px-6 py-3 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl font-bold uppercase tracking-wider shadow-lg hover:from-green-600 hover:to-green-700 hover:-translate-y-1 transition-all duration-300"
+                    >
+                        Stiahnuť
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Modal -->
         <div
             id="confirm-modal"
@@ -231,6 +281,12 @@ import Logo from "../../icons/Logo.astro";
         <template id="clock-icon-template">
             <Clock class="h-5 w-5" />
         </template>
+        <template id="check-icon-template">
+            <Check class="h-5 w-5" />
+        </template>
+        <template id="trash-icon-template">
+            <Trash class="h-5 w-5" />
+        </template>
     </main>
 
     <script>
@@ -241,6 +297,10 @@ import Logo from "../../icons/Logo.astro";
             document.getElementById("calendar-icon-template")?.innerHTML ?? "";
         const CLOCK_ICON =
             document.getElementById("clock-icon-template")?.innerHTML ?? "";
+        const CHECK_ICON =
+            document.getElementById("check-icon-template")?.innerHTML ?? "";
+        const TRASH_ICON =
+            document.getElementById("trash-icon-template")?.innerHTML ?? "";
 
         let allRegistrations: RegistrationResponse[] = [];
         let registrationEnabled = false;
@@ -384,13 +444,12 @@ import Logo from "../../icons/Logo.astro";
                             <thead>
                                 <tr>
                                     <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap first:rounded-tl-none">ID</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Meno žiaka</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Priezvisko žiaka</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Meno zástupcu</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Priezvisko zástupcu</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Telefón</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Email</th>
-                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 text-sm uppercase tracking-wider whitespace-nowrap last:rounded-tr-none">Dátum prihlásenia</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Žiak</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Zástupca</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Kontakt</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Dátum prihlásenia</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 border-r border-r-gray-700 text-sm uppercase tracking-wider whitespace-nowrap">Stav</th>
+                                    <th class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-5 text-left font-bold text-white border-b-2 border-gray-600 text-sm uppercase tracking-wider whitespace-nowrap last:rounded-tr-none">Akcie</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -399,13 +458,28 @@ import Logo from "../../icons/Logo.astro";
                                         (reg, index) => `
                                     <tr class="${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-yellow-50 transition-colors duration-200">
                                         <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.id}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.student_first_name}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">${reg.student_last_name}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600">${reg.guardian_first_name}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600">${reg.guardian_last_name}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 font-mono text-sm">${reg.guardian_phone}</td>
-                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 font-mono text-sm">${reg.guardian_email}</td>
-                                        <td class="p-4 border-b border-gray-200 text-gray-600 text-sm">${formatDateTime(reg.created_at)}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-800 font-medium">
+                                            <div class="font-bold">${reg.student_first_name} ${reg.student_last_name}</div>
+                                        </td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600">
+                                            <div class="font-medium text-gray-900">${reg.guardian_first_name} ${reg.guardian_last_name}</div>
+                                        </td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 font-mono text-sm">
+                                            <div>${reg.guardian_email}</div>
+                                            <div class="text-xs text-gray-500 mt-1">${reg.guardian_phone}</div>
+                                        </td>
+                                        <td class="p-4 border-b border-r border-gray-200 text-gray-600 text-sm">${formatDateTime(reg.created_at)}</td>
+                                        <td class="p-4 border-b border-r border-gray-200 font-bold ${reg.confirmed ? 'text-green-600' : 'text-red-500'}">
+                                            ${reg.confirmed ? 'Potvrdené' : 'Čaká na potvrdenie'}
+                                        </td>
+                                        <td class="p-4 border-b border-gray-200 text-gray-600 text-sm">
+                                            <div class="flex gap-2 justify-center">
+                                                ${!reg.confirmed 
+                                                    ? `<button class="btn-confirm bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-sm transition-colors" title="Potvrdiť" data-id="${reg.id}">${CHECK_ICON}</button>` 
+                                                    : ''}
+                                                <button class="btn-delete bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg shadow-sm transition-colors" title="Zmazať" data-id="${reg.id}">${TRASH_ICON}</button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 `,
                                     )
@@ -415,9 +489,57 @@ import Logo from "../../icons/Logo.astro";
                     </div>
                 </div>
             `;
+
             }
 
             container.innerHTML = html;
+
+            // Add listeners
+            document.querySelectorAll('.btn-confirm').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    // Use currentTarget to ensure we get the button element, not the inner SVG
+                    const target = e.currentTarget as HTMLElement;
+                    const id = parseInt(target.getAttribute('data-id') || "0");
+                    if(id) await handleConfirmRegistration(id);
+                });
+            });
+
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    // Use currentTarget to ensure we get the button element, not the inner SVG
+                    const target = e.currentTarget as HTMLElement;
+                    const id = parseInt(target.getAttribute('data-id') || "0");
+                    if(id) await handleDeleteRegistration(id);
+                });
+            });
+        }
+
+        async function handleConfirmRegistration(id: number) {
+            try {
+                await api.admin.confirmRegistration(id);
+                showMessage("Registrácia bola potvrdená", "success");
+                loadRegistrations();
+            } catch (error: any) {
+                console.error("Error confirming registration:", error);
+                showMessage(error.message || "Chyba pri potvrdzovaní", "error");
+            }
+        }
+
+        async function handleDeleteRegistration(id: number) {
+            const confirmed = await showConfirmModal(
+                "Zmazať registráciu",
+                "Naozaj chcete zmazať túto registráciu? Táto akcia je nevratná."
+            );
+            if (!confirmed) return;
+
+            try {
+                await api.admin.deleteRegistration(id);
+                showMessage("Registrácia bola zmazaná", "success");
+                loadRegistrations();
+            } catch (error: any) {
+                console.error("Error deleting registration:", error);
+                showMessage(error.message || "Chyba pri mazaní", "error");
+            }
         }
 
         function formatDateTime(dateTimeStr: string): string {
@@ -431,19 +553,17 @@ import Logo from "../../icons/Logo.astro";
             return `${day}.${month}.${year} ${hours}:${minutes}`;
         }
 
-        function showConfirmModal(): Promise<boolean> {
+        function showConfirmModal(title: string, message: string): Promise<boolean> {
             return new Promise((resolve) => {
                 const modal = document.getElementById("confirm-modal")!;
+                const modalTitle = document.getElementById("modal-title")!;
                 const modalMessage = document.getElementById("modal-message")!;
                 const confirmBtn = document.getElementById("modal-confirm")!;
                 const cancelBtn = document.getElementById("modal-cancel")!;
                 const backdrop = document.getElementById("modal-backdrop")!;
 
-                // Set message based on current state
-                const newState = !registrationEnabled;
-                modalMessage.textContent = newState
-                    ? "Naozaj chcete ZAPNÚŤ prihlasovanie? Používatelia sa budú môcť prihlasovať na odborové dni."
-                    : "Naozaj chcete VYPNÚŤ prihlasovanie? Používatelia sa nebudú môcť prihlasovať na odborové dni.";
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
 
                 modal.classList.remove("hidden");
 
@@ -471,7 +591,12 @@ import Logo from "../../icons/Logo.astro";
         }
 
         async function toggleRegistration() {
-            const confirmed = await showConfirmModal();
+            const newState = !registrationEnabled;
+            const message = newState
+                ? "Naozaj chcete ZAPNÚŤ prihlasovanie? Používatelia sa budú môcť prihlasovať na odborové dni."
+                : "Naozaj chcete VYPNÚŤ prihlasovanie? Používatelia sa nebudú môcť prihlasovať na odborové dni.";
+
+            const confirmed = await showConfirmModal("Potvrdiť zmenu", message);
             if (!confirmed) return;
 
             const btn = document.getElementById(
@@ -545,8 +670,13 @@ import Logo from "../../icons/Logo.astro";
         }
 
         async function handleExport() {
+            const includeUnconfirmed = await showExportModal();
+            if (includeUnconfirmed === null) return; // User cancelled
+
+            const queryParams = includeUnconfirmed ? "?include_unconfirmed=true" : "";
+
             try {
-                const response = await fetch("/api/admin/registrations/export");
+                const response = await fetch(`/api/admin/registrations/export${queryParams}`);
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
@@ -566,6 +696,43 @@ import Logo from "../../icons/Logo.astro";
                 showMessage("Chyba pri exporte", "error");
             }
         }
+
+        function showExportModal(): Promise<boolean | null> {
+            return new Promise((resolve) => {
+                const modal = document.getElementById("export-modal")!;
+                const confirmBtn = document.getElementById("export-confirm")!;
+                const cancelBtn = document.getElementById("export-cancel")!;
+                const backdrop = document.getElementById("export-backdrop")!;
+                const checkbox = document.getElementById("export-include-unconfirmed") as HTMLInputElement;
+
+                // Reset checkbox
+                checkbox.checked = false;
+
+                modal.classList.remove("hidden");
+
+                const cleanup = () => {
+                    modal.classList.add("hidden");
+                    confirmBtn.removeEventListener("click", handleConfirm);
+                    cancelBtn.removeEventListener("click", handleCancel);
+                    backdrop.removeEventListener("click", handleCancel);
+                };
+
+                const handleConfirm = () => {
+                    cleanup();
+                    resolve(checkbox.checked);
+                };
+
+                const handleCancel = () => {
+                    cleanup();
+                    resolve(null);
+                };
+
+                confirmBtn.addEventListener("click", handleConfirm);
+                cancelBtn.addEventListener("click", handleCancel);
+                backdrop.addEventListener("click", handleCancel);
+            });
+        }
+
 
         // Initialize
         document.addEventListener("DOMContentLoaded", async () => {

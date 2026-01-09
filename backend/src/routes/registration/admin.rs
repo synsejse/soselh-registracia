@@ -130,6 +130,7 @@ pub async fn get_all_registrations(
             guardian_last_name: reg.guardian_last_name,
             guardian_phone: reg.guardian_phone,
             guardian_email: reg.guardian_email,
+            confirmed: reg.confirmed,
             created_at: reg
                 .created_at
                 .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
@@ -141,19 +142,29 @@ pub async fn get_all_registrations(
 }
 
 // Route to export registrations to Excel - requires authentication
-#[get("/admin/registrations/export")]
+#[get("/admin/registrations/export?<include_unconfirmed>")]
 pub async fn export_registrations_excel(
     mut db: Connection<RegistrationDB>,
     cookies: &CookieJar<'_>,
+    include_unconfirmed: Option<bool>,
 ) -> Result<(ContentType, Vec<u8>), Status> {
     // Check authentication
     if !is_admin_authenticated(cookies, &mut db).await {
         return Err(Status::Unauthorized);
     }
 
-    let all_registrations = registrations::table
+    let include_unconfirmed = include_unconfirmed.unwrap_or(false);
+
+    let mut query = registrations::table
         .inner_join(sessions::table.on(registrations::session_id.eq(sessions::id)))
         .select((Registration::as_select(), Session::as_select()))
+        .into_boxed();
+
+    if !include_unconfirmed {
+        query = query.filter(registrations::confirmed.eq(true));
+    }
+
+    let all_registrations = query
         .load::<(Registration, Session)>(&mut db)
         .await
         .map_err(|e| {
@@ -174,8 +185,13 @@ pub async fn export_registrations_excel(
         "Priezvisko zákonného zástupcu",
         "Email",
         "Telefón",
-        "Dátum a čas",
+        "Turnus",
+        "Dátum",
+        "Začiatok",
+        "Koniec",
         "Odbor",
+        "Názov odboru",
+        "Potvrdené",
         "Vytvorené",
     ];
 
@@ -209,15 +225,36 @@ pub async fn export_registrations_excel(
             .write_string(row, 6, &reg.guardian_phone)
             .map_err(|_| Status::InternalServerError)?;
 
-        let session_time = format!(
-            "{} {} - {}",
-            session.session_date, session.start_time, session.end_time
-        );
         worksheet
-            .write_string(row, 7, &session_time)
+            .write_number(row, 7, session.turnus as f64)
             .map_err(|_| Status::InternalServerError)?;
+
+        let date_str = session.session_date.format("%d.%m.%Y").to_string();
         worksheet
-            .write_string(row, 8, &session.field_code)
+            .write_string(row, 8, &date_str)
+            .map_err(|_| Status::InternalServerError)?;
+
+        let start_str = session.start_time.format("%H:%M").to_string();
+        worksheet
+            .write_string(row, 9, &start_str)
+            .map_err(|_| Status::InternalServerError)?;
+
+        let end_str = session.end_time.format("%H:%M").to_string();
+        worksheet
+            .write_string(row, 10, &end_str)
+            .map_err(|_| Status::InternalServerError)?;
+
+        worksheet
+            .write_string(row, 11, &session.field_code)
+            .map_err(|_| Status::InternalServerError)?;
+
+        worksheet
+            .write_string(row, 12, &session.field_name)
+            .map_err(|_| Status::InternalServerError)?;
+
+        let confirmed = if reg.confirmed { "Áno" } else { "Nie" };
+        worksheet
+            .write_string(row, 13, confirmed)
             .map_err(|_| Status::InternalServerError)?;
 
         let created_at = reg
@@ -225,11 +262,13 @@ pub async fn export_registrations_excel(
             .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
             .unwrap_or_default();
         worksheet
-            .write_string(row, 9, &created_at)
+            .write_string(row, 14, &created_at)
             .map_err(|_| Status::InternalServerError)?;
     }
 
     worksheet.autofit();
+    // Add autofilter to all columns
+    worksheet.autofilter(0, 0, all_registrations.len() as u32, (headers.len() - 1) as u16).map_err(|_| Status::InternalServerError)?;
 
     let buf = workbook.save_to_buffer().map_err(|e| {
         eprintln!("Error saving excel buffer: {}", e);
@@ -274,4 +313,51 @@ pub async fn toggle_registration(
         .store(new_value, Ordering::Relaxed);
 
     Ok(Json(new_value))
+}
+
+// Route to confirm a registration - requires authentication
+#[post("/admin/registrations/<id>/confirm")]
+pub async fn confirm_registration(
+    mut db: Connection<RegistrationDB>,
+    cookies: &CookieJar<'_>,
+    id: i32,
+) -> Result<Status, Status> {
+    // Check authentication
+    if !is_admin_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
+    diesel::update(registrations::table.find(id))
+        .set(registrations::confirmed.eq(true))
+        .execute(&mut db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error confirming registration: {}", e);
+            Status::InternalServerError
+        })?;
+
+    Ok(Status::Ok)
+}
+
+// Route to delete a registration - requires authentication
+#[delete("/admin/registrations/<id>")]
+pub async fn delete_registration(
+    mut db: Connection<RegistrationDB>,
+    cookies: &CookieJar<'_>,
+    id: i32,
+) -> Result<Status, Status> {
+    // Check authentication
+    if !is_admin_authenticated(cookies, &mut db).await {
+        return Err(Status::Unauthorized);
+    }
+
+    diesel::delete(registrations::table.find(id))
+        .execute(&mut db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error deleting registration: {}", e);
+            Status::InternalServerError
+        })?;
+
+    Ok(Status::Ok)
 }

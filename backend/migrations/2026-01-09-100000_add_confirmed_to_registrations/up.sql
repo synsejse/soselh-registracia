@@ -1,0 +1,2 @@
+ALTER TABLE registrations ADD COLUMN confirmed BOOLEAN NOT NULL DEFAULT FALSE;
+

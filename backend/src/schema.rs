@@ -27,6 +27,7 @@ diesel::table! {
         guardian_phone -> Varchar,
         #[max_length = 255]
         guardian_email -> Varchar,
+        confirmed -> Bool,
         created_at -> Nullable<Timestamp>,
     }
 }

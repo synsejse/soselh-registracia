@@ -214,7 +214,7 @@ import Logo from "../icons/Logo.astro";
             document.getElementById("clock-icon-template")?.innerHTML ?? "";
 
         let sessions: Session[] = [];
-        let selectedSessionId: number | null = null;
+        let selectedSessions = new Map<number, number>(); // Turnus -> SessionId
 
         async function loadSessions() {
             try {
@@ -270,16 +270,38 @@ import Logo from "../icons/Logo.astro";
 
             container.innerHTML = html;
 
-            // Add event listeners to radio buttons
+            // Add event listeners to checkboxes
             document
-                .querySelectorAll('input[name="session"]')
-                .forEach((radio) => {
-                    radio.addEventListener("change", (e) => {
+                .querySelectorAll('input[type="checkbox"]')
+                .forEach((checkbox) => {
+                    checkbox.addEventListener("change", (e) => {
                         const target = e.target as HTMLInputElement;
-                        selectedSessionId = parseInt(target.value);
-                        document
-                            .getElementById("submit-btn")!
-                            .removeAttribute("disabled");
+                        const sessionId = parseInt(target.value);
+                        const session = sessions.find(s => s.id === sessionId);
+
+                        if (!session) return;
+
+                        if (target.checked) {
+                            // Uncheck other checkboxes in the same turnus
+                            const turnusInputs = document.querySelectorAll(`input[name="session_turnus_${session.turnus}"]`);
+                            turnusInputs.forEach((input: any) => {
+                                if (input !== target && input.checked) {
+                                    input.checked = false;
+                                }
+                            });
+
+                            selectedSessions.set(session.turnus, sessionId);
+                        } else {
+                            // If unchecked, remove from selection
+                            selectedSessions.delete(session.turnus);
+                        }
+
+                        const submitBtn = document.getElementById("submit-btn")!;
+                        if (selectedSessions.size > 0) {
+                            submitBtn.removeAttribute("disabled");
+                        } else {
+                            submitBtn.setAttribute("disabled", "true");
+                        }
                     });
                 });
         }
@@ -310,13 +332,14 @@ import Logo from "../icons/Logo.astro";
                         ? "opacity-60 bg-gray-50 border-gray-300 cursor-not-allowed"
                         : "bg-white border-gray-200 hover:border-yellow-500 hover:shadow-md hover:-translate-y-1 cursor-pointer";
                     const inputDisabled = !isAvailable ? "disabled" : "";
+                    const inputName = `session_turnus_${session.turnus}`;
 
                     return `
                     <div class="border-2 rounded-xl transition-all duration-300 ${fullClass}">
                         <label class="flex items-center p-5 w-full h-full ${!isAvailable ? "cursor-not-allowed" : "cursor-pointer"}">
                             <input
-                                type="radio"
-                                name="session"
+                                type="checkbox"
+                                name="${inputName}"
                                 value="${session.id}"
                                 ${inputDisabled}
                                 class="w-5 h-5 mr-5 accent-yellow-500 cursor-pointer"
@@ -354,8 +377,8 @@ import Logo from "../icons/Logo.astro";
         async function handleSubmit(e: Event) {
             e.preventDefault();
 
-            if (!selectedSessionId) {
-                showMessage("Prosím vyberte termín", "error");
+            if (selectedSessions.size === 0) {
+                showMessage("Prosím vyberte aspoň jeden termín", "error");
                 return;
             }
 
@@ -369,31 +392,51 @@ import Logo from "../icons/Logo.astro";
             submitBtn.textContent = "Prihlasovanie...";
 
             try {
-                await api.createRegistration({
-                    session_id: selectedSessionId,
-                    student_first_name: formData.get(
-                        "student_first_name",
-                    ) as string,
-                    student_last_name: formData.get(
-                        "student_last_name",
-                    ) as string,
-                    guardian_first_name: formData.get(
-                        "guardian_first_name",
-                    ) as string,
-                    guardian_last_name: formData.get(
-                        "guardian_last_name",
-                    ) as string,
-                    guardian_phone: formData.get("guardian_phone") as string,
-                    guardian_email: formData.get("guardian_email") as string,
-                });
+                // Collect promises for all selected sessions
+                const promises = [];
+                const sessionsToRegister = [];
 
-                // Find selected session details
-                const selectedSession = sessions.find(
-                    (s) => s.id === selectedSessionId,
-                );
+                for (const sessionId of selectedSessions.values()) {
+                    sessionsToRegister.push(sessionId);
+                }
+
+                for (const sessionId of sessionsToRegister) {
+                   promises.push(api.createRegistration({
+                        session_id: sessionId,
+                        student_first_name: formData.get(
+                            "student_first_name",
+                        ) as string,
+                        student_last_name: formData.get(
+                            "student_last_name",
+                        ) as string,
+                        guardian_first_name: formData.get(
+                            "guardian_first_name",
+                        ) as string,
+                        guardian_last_name: formData.get(
+                            "guardian_last_name",
+                        ) as string,
+                        guardian_phone: formData.get("guardian_phone") as string,
+                        guardian_email: formData.get("guardian_email") as string,
+                    }));
+                }
+
+                await Promise.all(promises);
+
+                // Prepare details for success page
+                const selectedSessionsDetails = sessionsToRegister
+                    .map(id => sessions.find(s => s.id === id))
+                    .filter(s => s !== undefined)
+                    .map(s => ({
+                        fieldCode: s!.field_code,
+                        fieldName: s!.field_name,
+                        date: s!.session_date,
+                        startTime: s!.start_time,
+                        endTime: s!.end_time,
+                        turnus: s!.turnus
+                    }));
 
                 // Store registration details for success page
-                if (selectedSession) {
+                if (selectedSessionsDetails.length > 0) {
                     const registrationDetails = {
                         student: {
                             firstName: formData.get(
@@ -403,13 +446,7 @@ import Logo from "../icons/Logo.astro";
                                 "student_last_name",
                             ) as string,
                         },
-                        session: {
-                            fieldCode: selectedSession.field_code,
-                            fieldName: selectedSession.field_name,
-                            date: selectedSession.session_date,
-                            startTime: selectedSession.start_time,
-                            endTime: selectedSession.end_time,
-                        },
+                        sessions: selectedSessionsDetails
                     };
                     localStorage.setItem(
                         "lastRegistration",

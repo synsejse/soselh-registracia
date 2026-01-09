@@ -29,6 +29,7 @@ pub async fn get_sessions(
         // Count registrations for this session
         let registration_count: i64 = registrations::table
             .filter(registrations::session_id.eq(session.id))
+            .filter(registrations::confirmed.eq(true))
             .count()
             .get_result(&mut db)
             .await
@@ -74,6 +75,7 @@ pub async fn create_registration(
     // Count current registrations
     let registration_count: i64 = registrations::table
         .filter(registrations::session_id.eq(session.id))
+        .filter(registrations::confirmed.eq(true))
         .count()
         .get_result(&mut db)
         .await
