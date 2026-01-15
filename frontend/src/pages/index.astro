@@ -9,7 +9,7 @@ import Logo from "../icons/Logo.astro";
 
 <Layout title="Prihlasovanie na odborové dni">
     <main
-        class="min-h-screen w-full bg-gradient-to-br from-gray-100 to-gray-300 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-start"
+        class="min-h-screen w-full bg-linear-to-br from-gray-100 to-gray-300 py-12 px-4 sm:px-6 lg:px-8 flex justify-center items-start"
     >
         <div class="max-w-5xl w-full">
             <div class="flex justify-center mb-8">
@@ -179,10 +179,40 @@ import Logo from "../icons/Logo.astro";
                         </div>
                     </div>
 
+                    <div
+                        class="mb-8 bg-gray-50 border-2 border-gray-200 rounded-xl p-6"
+                    >
+                        <label
+                            class="flex items-start gap-4 cursor-pointer group"
+                        >
+                            <input
+                                type="checkbox"
+                                id="consent_personal"
+                                name="consent_personal"
+                                required
+                                class="mt-0.5 w-5 h-5 accent-yellow-500 cursor-pointer shrink-0"
+                            />
+                            <span
+                                class="text-sm md:text-base text-gray-700 leading-relaxed"
+                            >
+                                Súhlasím so spracovaním osobných údajov podľa
+                                <a
+                                    href="/Popis_spracuvania_OU_SOSE_Liptovsky_Hradok.pdf"
+                                    target="_blank"
+                                    class="text-yellow-600 font-semibold underline hover:text-yellow-700 transition-colors"
+                                    >Popisu spracúvania osobných údajov</a
+                                >
+                                <span class="text-red-600 font-semibold ml-1"
+                                    >*</span
+                                >
+                            </span>
+                        </label>
+                    </div>
+
                     <button
                         type="submit"
                         id="submit-btn"
-                        class="w-full py-4 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl text-lg font-bold uppercase tracking-wider shadow-lg transition-all duration-300 hover:from-yellow-600 hover:to-yellow-700 hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                        class="w-full py-4 bg-linear-to-br from-yellow-500 to-yellow-600 text-white rounded-xl text-lg font-bold uppercase tracking-wider shadow-lg transition-all duration-300 hover:from-yellow-600 hover:to-yellow-700 hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
                         disabled
                     >
                         Prihlásiť sa
@@ -277,13 +307,17 @@ import Logo from "../icons/Logo.astro";
                     checkbox.addEventListener("change", (e) => {
                         const target = e.target as HTMLInputElement;
                         const sessionId = parseInt(target.value);
-                        const session = sessions.find(s => s.id === sessionId);
+                        const session = sessions.find(
+                            (s) => s.id === sessionId,
+                        );
 
                         if (!session) return;
 
                         if (target.checked) {
                             // Uncheck other checkboxes in the same turnus
-                            const turnusInputs = document.querySelectorAll(`input[name="session_turnus_${session.turnus}"]`);
+                            const turnusInputs = document.querySelectorAll(
+                                `input[name="session_turnus_${session.turnus}"]`,
+                            );
                             turnusInputs.forEach((input: any) => {
                                 if (input !== target && input.checked) {
                                     input.checked = false;
@@ -296,14 +330,37 @@ import Logo from "../icons/Logo.astro";
                             selectedSessions.delete(session.turnus);
                         }
 
-                        const submitBtn = document.getElementById("submit-btn")!;
-                        if (selectedSessions.size > 0) {
+                        const consentCheckbox = document.getElementById(
+                            "consent_personal",
+                        ) as HTMLInputElement | null;
+                        const submitBtn =
+                            document.getElementById("submit-btn")!;
+                        const hasConsent = consentCheckbox
+                            ? consentCheckbox.checked
+                            : false;
+                        if (selectedSessions.size > 0 && hasConsent) {
                             submitBtn.removeAttribute("disabled");
                         } else {
                             submitBtn.setAttribute("disabled", "true");
                         }
                     });
                 });
+
+            // Re-evaluate submit button when consent checkbox changes
+            const consentEl = document.getElementById(
+                "consent_personal",
+            ) as HTMLInputElement | null;
+            if (consentEl) {
+                consentEl.addEventListener("change", () => {
+                    const submitBtn = document.getElementById("submit-btn")!;
+                    const hasConsent = consentEl.checked;
+                    if (selectedSessions.size > 0 && hasConsent) {
+                        submitBtn.removeAttribute("disabled");
+                    } else {
+                        submitBtn.setAttribute("disabled", "true");
+                    }
+                });
+            }
         }
 
         function renderSessionGroup(sessions: Session[]): string {
@@ -382,6 +439,17 @@ import Logo from "../icons/Logo.astro";
                 return;
             }
 
+            const consentEl = document.getElementById(
+                "consent_personal",
+            ) as HTMLInputElement | null;
+            if (!consentEl || !consentEl.checked) {
+                showMessage(
+                    "Prosím odsúhlaste spracovanie osobných údajov.",
+                    "error",
+                );
+                return;
+            }
+
             const form = e.target as HTMLFormElement;
             const formData = new FormData(form);
 
@@ -401,38 +469,44 @@ import Logo from "../icons/Logo.astro";
                 }
 
                 for (const sessionId of sessionsToRegister) {
-                   promises.push(api.createRegistration({
-                        session_id: sessionId,
-                        student_first_name: formData.get(
-                            "student_first_name",
-                        ) as string,
-                        student_last_name: formData.get(
-                            "student_last_name",
-                        ) as string,
-                        guardian_first_name: formData.get(
-                            "guardian_first_name",
-                        ) as string,
-                        guardian_last_name: formData.get(
-                            "guardian_last_name",
-                        ) as string,
-                        guardian_phone: formData.get("guardian_phone") as string,
-                        guardian_email: formData.get("guardian_email") as string,
-                    }));
+                    promises.push(
+                        api.createRegistration({
+                            session_id: sessionId,
+                            student_first_name: formData.get(
+                                "student_first_name",
+                            ) as string,
+                            student_last_name: formData.get(
+                                "student_last_name",
+                            ) as string,
+                            guardian_first_name: formData.get(
+                                "guardian_first_name",
+                            ) as string,
+                            guardian_last_name: formData.get(
+                                "guardian_last_name",
+                            ) as string,
+                            guardian_phone: formData.get(
+                                "guardian_phone",
+                            ) as string,
+                            guardian_email: formData.get(
+                                "guardian_email",
+                            ) as string,
+                        }),
+                    );
                 }
 
                 await Promise.all(promises);
 
                 // Prepare details for success page
                 const selectedSessionsDetails = sessionsToRegister
-                    .map(id => sessions.find(s => s.id === id))
-                    .filter(s => s !== undefined)
-                    .map(s => ({
+                    .map((id) => sessions.find((s) => s.id === id))
+                    .filter((s) => s !== undefined)
+                    .map((s) => ({
                         fieldCode: s!.field_code,
                         fieldName: s!.field_name,
                         date: s!.session_date,
                         startTime: s!.start_time,
                         endTime: s!.end_time,
-                        turnus: s!.turnus
+                        turnus: s!.turnus,
                     }));
 
                 // Store registration details for success page
@@ -446,7 +520,7 @@ import Logo from "../icons/Logo.astro";
                                 "student_last_name",
                             ) as string,
                         },
-                        sessions: selectedSessionsDetails
+                        sessions: selectedSessionsDetails,
                     };
                     localStorage.setItem(
                         "lastRegistration",
