@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Calendar from "../icons/Calendar.astro";
+import Clock from "../icons/Clock.astro";
 import Logo from "../icons/Logo.astro";
 ---
 
@@ -75,8 +76,14 @@ import Logo from "../icons/Logo.astro";
                 </h3>
 
                 <div class="mb-6 text-center">
-                     <span class="text-gray-600 font-bold uppercase tracking-wider text-sm block mb-1">Žiak:</span>
-                     <span class="text-2xl font-extrabold text-gray-900" id="student-name">-</span>
+                    <span
+                        class="text-gray-600 font-bold uppercase tracking-wider text-sm block mb-1"
+                        >Žiak:</span
+                    >
+                    <span
+                        class="text-2xl font-extrabold text-gray-900"
+                        id="student-name">-</span
+                    >
                 </div>
 
                 <div id="sessions-list" class="flex flex-col gap-6">
@@ -90,6 +97,14 @@ import Logo from "../icons/Logo.astro";
         >
             <span>Kristián Kekeš & SOŠ Elektrotechnická</span>
         </div>
+
+        <!-- Hidden icon templates for JavaScript to reference -->
+        <template id="calendar-icon-template">
+            <Calendar class="h-4 w-4 text-gray-400" />
+        </template>
+        <template id="clock-icon-template">
+            <Clock class="h-4 w-4 text-gray-400" />
+        </template>
     </main>
 
     <script>
@@ -115,24 +130,32 @@ import Logo from "../icons/Logo.astro";
                     }
 
                     if (sessions.length > 0) {
-                         // Sort sessions by date and time
-                         sessions.sort((a: any, b: any) => {
-                             const dateA = new Date(a.date + " " + a.startTime);
-                             const dateB = new Date(b.date + " " + b.startTime);
-                             return dateA.getTime() - dateB.getTime();
-                         });
+                        // Sort sessions by date and time
+                        sessions.sort((a: any, b: any) => {
+                            const dateA = new Date(a.date + " " + a.startTime);
+                            const dateB = new Date(b.date + " " + b.startTime);
+                            return dateA.getTime() - dateB.getTime();
+                        });
 
-                         sessions.forEach((session: any) => {
-                             const sessionEl = document.createElement('div');
-                             sessionEl.className = "bg-white rounded-xl border border-[#d4af37]/30 shadow-sm overflow-hidden";
+                        sessions.forEach((session: any) => {
+                            const sessionEl = document.createElement("div");
+                            sessionEl.className =
+                                "bg-white rounded-xl border border-[#d4af37]/30 shadow-sm overflow-hidden";
 
-                             const turnusText = session.turnus ? `<div class="bg-[#d4af37]/10 text-[#d4af37] font-bold text-xs uppercase px-4 py-1 border-b border-[#d4af37]/20">${session.turnus}. turnus</div>` : '';
+                            const turnusText = session.turnus
+                                ? `<div class="bg-[#d4af37]/10 text-[#d4af37] font-bold text-xs uppercase px-4 py-1 border-b border-[#d4af37]/20">${session.turnus}. turnus</div>`
+                                : "";
 
-                             // SVG Icons
-                             const calendarIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
-                             const clockIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+                            // Get icon HTML from templates
+                            const calendarIcon =
+                                document.getElementById(
+                                    "calendar-icon-template",
+                                )?.innerHTML ?? "";
+                            const clockIcon =
+                                document.getElementById("clock-icon-template")
+                                    ?.innerHTML ?? "";
 
-                             sessionEl.innerHTML = `
+                            sessionEl.innerHTML = `
                                 ${turnusText}
                                 <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="flex flex-col gap-1">
@@ -154,10 +177,10 @@ import Logo from "../icons/Logo.astro";
                                     </div>
                                 </div>
                              `;
-                             sessionsList.appendChild(sessionEl);
-                         });
+                            sessionsList.appendChild(sessionEl);
+                        });
 
-                         sessionInfo.classList.remove("hidden");
+                        sessionInfo.classList.remove("hidden");
                     }
                 }
 
