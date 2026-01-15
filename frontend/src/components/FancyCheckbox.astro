@@ -17,84 +17,86 @@
   inside a <label> if needed) so the component stays flexible.
 */
 const {
-  id = "",
-  name = "",
-  value = "on",
-  checked = false,
-  required = false,
-  disabled = false,
-  class: extraClass = "",
-  ariaLabel = "",
+    id = "",
+    name = "",
+    value = "on",
+    checked = false,
+    required = false,
+    disabled = false,
+    class: extraClass = "",
+    ariaLabel = "",
 } = Astro.props;
 
 import Check from "../icons/Check.astro";
 ---
 
 <div class={`fancy-checkbox ${extraClass}`}>
-  <input
-    type="checkbox"
-    id={id || undefined}
-    name={name || undefined}
-    value={value}
-    checked={checked ? true : undefined}
-    required={required ? true : undefined}
-    disabled={disabled ? true : undefined}
-    aria-label={ariaLabel || undefined}
-  />
-  <div class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200">
-    <Check class="w-4 h-4 text-white" />
-  </div>
+    <input
+        type="checkbox"
+        id={id || undefined}
+        name={name || undefined}
+        value={value}
+        checked={checked ? true : undefined}
+        required={required ? true : undefined}
+        disabled={disabled ? true : undefined}
+        aria-label={ariaLabel || undefined}
+    />
+    <div
+        class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200"
+    >
+        <Check class="w-4 h-4 text-white" />
+    </div>
 </div>
 
 <style>
-  /* Keep styles local but expose the .fancy-checkbox classes globally for JS-injected markup parity */
-  :global(.fancy-checkbox) {
-    position: relative;
-    width: 22px;
-    height: 22px;
-  }
-
-  :global(.fancy-checkbox input) {
-    /* remove default appearance and make input cover the container to capture clicks */
-    appearance: none;
-    position: absolute;
-    inset: 0;
-    cursor: pointer;
-  }
-
-  :global(.fancy-checkbox svg) {
-    transform: scale(0);
-    transition: transform 0.2s ease;
-  }
-
-  :global(.fancy-checkbox input:checked + .box) {
-    background: #eab308; /* yellow-500 */
-    border-color: #eab308;
-    animation: checkbox-pulse 0.35s ease;
-  }
-
-  :global(.fancy-checkbox input:checked + .box svg) {
-    transform: scale(1);
-  }
-
-  :global(.fancy-checkbox input:focus-visible + .box) {
-    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.25);
-  }
-
-  :global(.fancy-checkbox input:disabled + .box) {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  @keyframes checkbox-pulse {
-    0% {
-      transform: scale(1);
+    /* Keep styles local but expose the .fancy-checkbox classes globally for JS-injected markup parity */
+    :global(.fancy-checkbox) {
+        position: relative;
+        width: 22px;
+        height: 22px;
     }
-    50% {
-      transform: scale(1.25);
+
+    :global(.fancy-checkbox input) {
+        /* remove default appearance and make input cover the container to capture clicks */
+        appearance: none;
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
     }
-    100% {
-      transform: scale(1);
+
+    :global(.fancy-checkbox svg) {
+        transform: scale(0);
+        transition: transform 0.2s ease;
     }
-  }
+
+    :global(.fancy-checkbox input:checked + .box) {
+        background: #eab308; /* yellow-500 */
+        border-color: #eab308;
+        animation: checkbox-pulse 0.35s ease;
+    }
+
+    :global(.fancy-checkbox input:checked + .box svg) {
+        transform: scale(1);
+    }
+
+    :global(.fancy-checkbox input:focus-visible + .box) {
+        box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.25);
+    }
+
+    :global(.fancy-checkbox input:disabled + .box) {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @keyframes checkbox-pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.25);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
 </style>
