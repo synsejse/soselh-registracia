@@ -6,6 +6,7 @@ import Calendar from "../icons/Calendar.astro";
 import Clock from "../icons/Clock.astro";
 import Logo from "../icons/Logo.astro";
 import Check from "../icons/Check.astro";
+import FancyCheckbox from "../components/FancyCheckbox.astro";
 ---
 
 <Layout title="Prihlasovanie na odborové dni">
@@ -186,19 +187,11 @@ import Check from "../icons/Check.astro";
                         <label
                             class="flex items-start gap-4 cursor-pointer group"
                         >
-                            <div class="fancy-checkbox mt-0.5 shrink-0">
-                                <input
-                                    type="checkbox"
-                                    id="consent_personal"
-                                    name="consent_personal"
-                                    required
-                                />
-                                <div
-                                    class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200"
-                                >
-                                    <Check class="w-4 h-4 text-white" />
-                                </div>
-                            </div>
+                            <FancyCheckbox
+                                id="consent_personal"
+                                name="consent_personal"
+                                required
+                            />
 
                             <span
                                 class="text-sm md:text-base text-gray-700 leading-relaxed"
@@ -243,6 +236,26 @@ import Check from "../icons/Check.astro";
         <template id="check-icon-template">
             <Check class="w-4 h-4 text-white" />
         </template>
+
+        <!-- Template for rendering a session checkbox; placeholders will be replaced in JS:
+             __NAME__ -> input name
+             __VALUE__ -> input value
+             data-disabled="__DISABLED__" -> will be replaced with 'disabled' or removed -->
+        <template id="session-checkbox-template">
+            <div class="fancy-checkbox mr-5 shrink-0">
+                <input
+                    type="checkbox"
+                    name="__NAME__"
+                    value="__VALUE__"
+                    data-disabled="__DISABLED__"
+                />
+                <div
+                    class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200"
+                >
+                    <Check class="w-4 h-4 text-white" />
+                </div>
+            </div>
+        </template>
     </main>
 
     <script>
@@ -255,6 +268,10 @@ import Check from "../icons/Check.astro";
             document.getElementById("clock-icon-template")?.innerHTML ?? "";
         const CHECK_ICON =
             document.getElementById("check-icon-template")?.innerHTML ?? "";
+        // Template for session checkbox (contains placeholders __NAME__, __VALUE__, __DISABLED__)
+        const SESSION_CHECKBOX_TEMPLATE =
+            document.getElementById("session-checkbox-template")?.innerHTML ??
+            "";
 
         let sessions: Session[] = [];
         let selectedSessions = new Map<number, number>(); // Turnus -> SessionId
@@ -317,6 +334,7 @@ import Check from "../icons/Check.astro";
             document
                 .querySelectorAll('input[type="checkbox"]')
                 .forEach((checkbox) => {
+                    // Skip checkboxes that are part of other controls (like consent etc.)
                     checkbox.addEventListener("change", (e) => {
                         const target = e.target as HTMLInputElement;
                         const sessionId = parseInt(target.value);
@@ -410,20 +428,22 @@ import Check from "../icons/Check.astro";
                     const inputDisabled = !isAvailable ? "disabled" : "";
                     const inputName = `session_turnus_${session.turnus}`;
 
+                    // Build checkbox HTML from template and safely inject 'disabled' only when needed
+                    const checkboxHtml = SESSION_CHECKBOX_TEMPLATE.replace(
+                        /__NAME__/g,
+                        inputName,
+                    )
+                        .replace(/__VALUE__/g, String(session.id))
+                        // Replace the whole data-disabled attribute with 'disabled' when needed, otherwise remove it
+                        .replace(
+                            /data-disabled="__DISABLED__"/g,
+                            inputDisabled ? "disabled" : "",
+                        );
+
                     return `
                     <div class="session-card border-2 rounded-xl transition-all duration-300 ${fullClass}">
                         <label class="flex items-center p-5 w-full h-full ${!isAvailable ? "cursor-not-allowed" : "cursor-pointer"}">
-                        <div class="fancy-checkbox mr-5 shrink-0">
-                          <input
-                            type="checkbox"
-                            name="${inputName}"
-                            value="${session.id}"
-                            ${inputDisabled}
-                          />
-                          <div class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200">
-                            ${CHECK_ICON}
-                          </div>
-                        </div>
+                        ${checkboxHtml}
                             <div class="flex-1">
                                 <div class="flex flex-wrap items-center gap-3 mb-2">
                                     <span class="font-bold text-lg text-white bg-gradient-to-br from-yellow-500 to-yellow-600 px-3 py-1 rounded-md shadow-sm">${session.field_code}</span>
@@ -603,63 +623,4 @@ import Check from "../icons/Check.astro";
                 .addEventListener("submit", handleSubmit);
         });
     </script>
-    <style>
-        /* Make styles global for JS-injected HTML */
-        :global(.fancy-checkbox) {
-            position: relative;
-            width: 22px;
-            height: 22px;
-        }
-
-        :global(.fancy-checkbox input) {
-            appearance: none;
-            position: absolute;
-            inset: 0;
-            cursor: pointer;
-        }
-
-        :global(.fancy-checkbox svg) {
-            transform: scale(0);
-            transition: transform 0.2s ease;
-        }
-
-        :global(.fancy-checkbox input:checked + .box) {
-            background: #eab308; /* yellow-500 */
-            border-color: #eab308;
-            animation: checkbox-pulse 0.35s ease;
-        }
-
-        :global(.fancy-checkbox input:checked + .box svg) {
-            transform: scale(1);
-        }
-
-        :global(.fancy-checkbox input:focus-visible + .box) {
-            box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.25);
-        }
-
-        :global(.fancy-checkbox input:disabled + .box) {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Card highlight */
-
-        :global(.session-card.checked) {
-            border-color: #eab308 !important;
-            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.25);
-            transform: translateY(-2px);
-        }
-
-        @keyframes checkbox-pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.25);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-    </style>
 </Layout>

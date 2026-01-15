@@ -5,6 +5,7 @@ import Clock from "../../icons/Clock.astro";
 import Logo from "../../icons/Logo.astro";
 import Check from "../../icons/Check.astro";
 import Trash from "../../icons/Trash.astro";
+import FancyCheckbox from "../../components/FancyCheckbox.astro";
 ---
 
 <Layout title="Admin - Správa prihlásení">
@@ -207,17 +208,7 @@ import Trash from "../../icons/Trash.astro";
                     <label
                         class="flex items-start gap-4 cursor-pointer group p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-500 transition-colors"
                     >
-                        <div class="fancy-checkbox mt-0.5 shrink-0">
-                            <input
-                                type="checkbox"
-                                id="export-include-unconfirmed"
-                            />
-                            <div
-                                class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200"
-                            >
-                                <Check class="w-4 h-4 text-white" />
-                            </div>
-                        </div>
+                        <FancyCheckbox id="export-include-unconfirmed" />
                         <span class="text-gray-700 font-medium select-none"
                             >Zahrnúť aj nepotvrdené (červené) registrácie</span
                         >
@@ -800,63 +791,6 @@ import Trash from "../../icons/Trash.astro";
         to {
             opacity: 1;
             transform: translateY(0) scale(1);
-        }
-    }
-
-    /* Make styles global for JS-injected HTML - copied from index.astro */
-    :global(.fancy-checkbox) {
-        position: relative;
-        width: 22px;
-        height: 22px;
-    }
-
-    :global(.fancy-checkbox input) {
-        appearance: none;
-        position: absolute;
-        inset: 0;
-        cursor: pointer;
-    }
-
-    :global(.fancy-checkbox svg) {
-        transform: scale(0);
-        transition: transform 0.2s ease;
-    }
-
-    :global(.fancy-checkbox input:checked + .box) {
-        background: #eab308; /* yellow-500 */
-        border-color: #eab308;
-        animation: checkbox-pulse 0.35s ease;
-    }
-
-    :global(.fancy-checkbox input:checked + .box svg) {
-        transform: scale(1);
-    }
-
-    :global(.fancy-checkbox input:focus-visible + .box) {
-        box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.25);
-    }
-
-    :global(.fancy-checkbox input:disabled + .box) {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    /* Card highlight (not strictly needed here but kept for parity) */
-    :global(.session-card.checked) {
-        border-color: #eab308 !important;
-        box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.25);
-        transform: translateY(-2px);
-    }
-
-    @keyframes checkbox-pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.25);
-        }
-        100% {
-            transform: scale(1);
         }
     }
 </style>
