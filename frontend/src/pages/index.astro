@@ -5,6 +5,7 @@ import Envelope from "../icons/Envelope.astro";
 import Calendar from "../icons/Calendar.astro";
 import Clock from "../icons/Clock.astro";
 import Logo from "../icons/Logo.astro";
+import Check from "../icons/Check.astro";
 ---
 
 <Layout title="Prihlasovanie na odborové dni">
@@ -185,13 +186,20 @@ import Logo from "../icons/Logo.astro";
                         <label
                             class="flex items-start gap-4 cursor-pointer group"
                         >
-                            <input
-                                type="checkbox"
-                                id="consent_personal"
-                                name="consent_personal"
-                                required
-                                class="mt-0.5 w-5 h-5 accent-yellow-500 cursor-pointer shrink-0"
-                            />
+                            <div class="fancy-checkbox mt-0.5 shrink-0">
+                                <input
+                                    type="checkbox"
+                                    id="consent_personal"
+                                    name="consent_personal"
+                                    required
+                                />
+                                <div
+                                    class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200"
+                                >
+                                    <Check class="w-4 h-4 text-white" />
+                                </div>
+                            </div>
+
                             <span
                                 class="text-sm md:text-base text-gray-700 leading-relaxed"
                             >
@@ -232,6 +240,9 @@ import Logo from "../icons/Logo.astro";
         <template id="clock-icon-template">
             <Clock class="h-4 w-4" />
         </template>
+        <template id="check-icon-template">
+            <Check class="w-4 h-4 text-white" />
+        </template>
     </main>
 
     <script>
@@ -242,6 +253,8 @@ import Logo from "../icons/Logo.astro";
             document.getElementById("calendar-icon-template")?.innerHTML ?? "";
         const CLOCK_ICON =
             document.getElementById("clock-icon-template")?.innerHTML ?? "";
+        const CHECK_ICON =
+            document.getElementById("check-icon-template")?.innerHTML ?? "";
 
         let sessions: Session[] = [];
         let selectedSessions = new Map<number, number>(); // Turnus -> SessionId
@@ -313,21 +326,27 @@ import Logo from "../icons/Logo.astro";
 
                         if (!session) return;
 
+                        const card = target.closest(".session-card");
+
                         if (target.checked) {
-                            // Uncheck other checkboxes in the same turnus
                             const turnusInputs = document.querySelectorAll(
                                 `input[name="session_turnus_${session.turnus}"]`,
                             );
+
                             turnusInputs.forEach((input: any) => {
                                 if (input !== target && input.checked) {
                                     input.checked = false;
+                                    input
+                                        .closest(".session-card")
+                                        ?.classList.remove("checked");
                                 }
                             });
 
                             selectedSessions.set(session.turnus, sessionId);
+                            card?.classList.add("checked");
                         } else {
-                            // If unchecked, remove from selection
                             selectedSessions.delete(session.turnus);
+                            card?.classList.remove("checked");
                         }
 
                         const consentCheckbox = document.getElementById(
@@ -392,15 +411,19 @@ import Logo from "../icons/Logo.astro";
                     const inputName = `session_turnus_${session.turnus}`;
 
                     return `
-                    <div class="border-2 rounded-xl transition-all duration-300 ${fullClass}">
+                    <div class="session-card border-2 rounded-xl transition-all duration-300 ${fullClass}">
                         <label class="flex items-center p-5 w-full h-full ${!isAvailable ? "cursor-not-allowed" : "cursor-pointer"}">
-                            <input
-                                type="checkbox"
-                                name="${inputName}"
-                                value="${session.id}"
-                                ${inputDisabled}
-                                class="w-5 h-5 mr-5 accent-yellow-500 cursor-pointer"
-                            />
+                        <div class="fancy-checkbox mr-5 shrink-0">
+                          <input
+                            type="checkbox"
+                            name="${inputName}"
+                            value="${session.id}"
+                            ${inputDisabled}
+                          />
+                          <div class="box w-[22px] h-[22px] flex items-center justify-center rounded-md border border-gray-300 bg-white transition-all duration-200">
+                            ${CHECK_ICON}
+                          </div>
+                        </div>
                             <div class="flex-1">
                                 <div class="flex flex-wrap items-center gap-3 mb-2">
                                     <span class="font-bold text-lg text-white bg-gradient-to-br from-yellow-500 to-yellow-600 px-3 py-1 rounded-md shadow-sm">${session.field_code}</span>
@@ -416,7 +439,13 @@ import Logo from "../icons/Logo.astro";
                                         ${session.start_time} - ${session.end_time}
                                     </span>
                                 </div>
-                                <div class="font-bold text-sm px-2 py-1 rounded inline-block ${!isAvailable ? "text-red-600 bg-red-100" : "text-green-600 bg-green-100"}">
+                                <div class="font-bold text-sm px-2 py-1 rounded inline-block ${
+                                    !isAvailable
+                                        ? "text-red-600 bg-red-100"
+                                        : session.available_spots < 2
+                                          ? "text-yellow-800 bg-yellow-100"
+                                          : "text-green-600 bg-green-100"
+                                }">
                                     ${
                                         isAvailable
                                             ? `Voľné miesta: ${session.available_spots}/${session.max_capacity}`
@@ -574,4 +603,63 @@ import Logo from "../icons/Logo.astro";
                 .addEventListener("submit", handleSubmit);
         });
     </script>
+    <style>
+        /* Make styles global for JS-injected HTML */
+        :global(.fancy-checkbox) {
+            position: relative;
+            width: 22px;
+            height: 22px;
+        }
+
+        :global(.fancy-checkbox input) {
+            appearance: none;
+            position: absolute;
+            inset: 0;
+            cursor: pointer;
+        }
+
+        :global(.fancy-checkbox svg) {
+            transform: scale(0);
+            transition: transform 0.2s ease;
+        }
+
+        :global(.fancy-checkbox input:checked + .box) {
+            background: #eab308; /* yellow-500 */
+            border-color: #eab308;
+            animation: checkbox-pulse 0.35s ease;
+        }
+
+        :global(.fancy-checkbox input:checked + .box svg) {
+            transform: scale(1);
+        }
+
+        :global(.fancy-checkbox input:focus-visible + .box) {
+            box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.25);
+        }
+
+        :global(.fancy-checkbox input:disabled + .box) {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Card highlight */
+
+        :global(.session-card.checked) {
+            border-color: #eab308 !important;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.25);
+            transform: translateY(-2px);
+        }
+
+        @keyframes checkbox-pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
 </Layout>
