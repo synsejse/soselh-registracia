@@ -32,3 +32,6 @@ frontend/.vscode/
 
 # --- Root-level ---
 .env
+
+# --- Release ---
+soselh-registration-release.zip
