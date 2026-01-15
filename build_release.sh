@@ -33,6 +33,6 @@ chmod +x release/start.sh
 # Compress
 echo "Compressing..."
 tar -cJf soselh-registration-release.tar.xz release/
+rm -rf release
 
 echo "Done! Release created at soselh-registration-release.tar.xz"
-
